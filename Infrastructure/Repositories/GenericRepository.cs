@@ -11,24 +11,25 @@ using Microsoft.EntityFrameworkCore;
 
 public class GenericRepository<T>(MediCallContext _context) : IGenericRepository<T> where T : BaseEntity
 {
+    private readonly DbSet<T> _dbSet = _context.Set<T>();
     public void Add(T entity)
     {
-        _context.Set<T>().Add(entity);
+        _dbSet.Add(entity);
     }
 
     public void Delete(T entity)
     {
-        _context.Set<T>().Remove(entity);
+        _dbSet.Remove(entity);
     }
 
     public async Task<IReadOnlyList<T>> GetAllAsync()
     {
-        return await _context.Set<T>().ToListAsync();
+        return await _dbSet.ToListAsync();
     }
 
-    public async Task<T?> GetByIdAsync(int id)
+    public async Task<T?> GetByIdAsync(object id)
     {
-        return await _context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+        return await _dbSet.FindAsync(id);
     }
 
     public async Task<bool> SaveAllAsync()
@@ -38,7 +39,7 @@ public class GenericRepository<T>(MediCallContext _context) : IGenericRepository
 
     public void Update(T entity)
     {
-        _context.Set<T>().Attach(entity);
+        _dbSet.Attach(entity);
         _context.Entry(entity).State = EntityState.Modified;
     }
 }

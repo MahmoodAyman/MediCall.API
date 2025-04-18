@@ -7,7 +7,7 @@ public interface IGenericRepository<T> where T : BaseEntity
 {
 
     // General Crud Ops 
-    Task<T?> GetByIdAsync(int id);
+    Task<T?> GetByIdAsync(object id);
     Task<IReadOnlyList<T>> GetAllAsync();
 
     void Add(T entity);
