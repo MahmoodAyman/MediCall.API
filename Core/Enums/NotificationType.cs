@@ -1,6 +1,6 @@
 namespace Core.Enums;
 
-public enum Notification
+public enum NotificationType
 {
     Appointment,
     Chat,

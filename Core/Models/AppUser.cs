@@ -20,9 +20,10 @@ namespace Core.Models
 
         public string? ProfilePicture { get; set; }
 
-        public double? Lat { get; set; }
-        public double? Lng { get; set; }
+        public Location? Location { get; set; }
 
-        public bool IsDeleted { get; set; }
+        public virtual List<Notification> Notifications { get; set; } = [];
+        public virtual List<ChatReference> ChatReferences { get; set; } = [];
+
     }
 }

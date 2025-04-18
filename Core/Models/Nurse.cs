@@ -13,8 +13,9 @@ namespace Core.Models
         public int ExperienceYears { get; set; }
         public bool IsAvailable { get; set; }
         public int visitCount = 0;
-        public virtual List<Visit> Visits { get; set; } = new List<Visit>();
-        public virtual List<NurseCertificate> Certificates { get; set; } = new List<NurseCertificate>();
+        public bool IsVerified { get; set; } = false;
+        public virtual List<Visit> Visits { get; set; } = [];
+        public virtual List<NurseCertificate> Certificates { get; set; } = [];
 
     }
 }

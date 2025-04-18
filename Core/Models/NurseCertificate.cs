@@ -10,9 +10,13 @@ namespace Core.Models
     {
         public int NurseId { get; set; }
         public int CertificateId { get; set; }
+
         public required string FilePath { get; set; }
         public DateTime? ExpirationDate { get; set; }
-        public virtual Nurse? Nurse { get; set; }
-        public virtual Certificate? Certificate { get; set; }
+        public bool IsExpired => ExpirationDate.HasValue && ExpirationDate.Value < DateTime.UtcNow;
+        public bool IsVerified { get; set; } = false;
+
+        public virtual Nurse Nurse { get; set; } = null!;
+        public virtual Certificate Certificate { get; set; } = null!;
     }
 }
