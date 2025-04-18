@@ -11,18 +11,19 @@ namespace Core.Models
 {
     public class AppUser : IdentityUser
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
 
         public Gender Gender { get; set; }
 
-        public string ProfilePicture { get; set; }
+        public string? ProfilePicture { get; set; }
 
-        public double? Lat { get; set; }
-        public double? Lng { get; set; }
+        public Location? Location { get; set; }
 
-        public bool IsDeleted { get; set; }
+        public virtual List<Notification> Notifications { get; set; } = [];
+        public virtual List<ChatReference> ChatReferences { get; set; } = [];
+
     }
 }
