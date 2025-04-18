@@ -10,14 +10,15 @@ public class Visit
     public DateTime ScheduledDate { get; set; }
     public string Notes { get; set; } = string.Empty;
     public VisitStatus Status { get; set; }
-
-    // Is This List<decimal> or List<Service> ?? 
-    public decimal ServiceCost => Services.Sum(s => s.BasePrice); // TODO: Check if this is correct!
+    public decimal ServiceCost => Services.Sum(s => s.BasePrice); 
     public decimal TransportationCost { get; set; }
-    public decimal TotalCost => ServiceCost + TransportationCost; // TODO: Check if this is correct!
+    public decimal TotalCost => ServiceCost + TransportationCost;
     public decimal Cost { get; set; }
+    public string? NurseId {  get; set; }
+    public required string PatioentId {  get; set; }
 
-    // TODO: Nurse and Patient Objects! 
     public virtual List<Service> Services { get; set; } = new List<Service>();
+    // TODO: Patient Objects! 
+    public virtual Nurse? Nurse { get; set; }
 
 }
