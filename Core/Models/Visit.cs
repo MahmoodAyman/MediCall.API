@@ -18,6 +18,6 @@ public class Visit
     public decimal Cost { get; set; }
 
     // TODO: Nurse and Patient Objects! 
-    public virtual List<Service> Services { get; set; } = new();
+    public virtual List<Service> Services { get; set; } = new List<Service>();
 
 }

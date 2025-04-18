@@ -3,7 +3,7 @@ using Core.Models;
 
 namespace Core.Interface;
 
-public interface IGenericRepository<T> where T : BaseEntity
+public interface IGenericRepository<T> where T : class
 {
 
     // General Crud Ops 

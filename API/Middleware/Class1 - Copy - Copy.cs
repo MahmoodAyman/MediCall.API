@@ -1,6 +1,4 @@
-﻿namespace Infrastructure.Configurations;
-
-public class Class1
+﻿public class Class1
 {
 
 }

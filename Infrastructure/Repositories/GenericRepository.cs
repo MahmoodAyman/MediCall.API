@@ -9,7 +9,7 @@ using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-public class GenericRepository<T>(MediCallContext _context) : IGenericRepository<T> where T : BaseEntity
+public class GenericRepository<T>(MediCallContext _context) : IGenericRepository<T> where T : class
 {
     private readonly DbSet<T> _dbSet = _context.Set<T>();
     public void Add(T entity)
