@@ -22,7 +22,7 @@ public class Visit
     public required Location NurseLocation { get; set; }
 
     public string? NurseId {  get; set; }
-    public required string PatienttId {  get; set; }
+    public required string PatientId {  get; set; }
     public virtual List<Service> Services { get; set; } = [];
     public virtual Nurse Nurse { get; set; } =null!;
     public virtual Patient Patient { get; set; } = null!;
