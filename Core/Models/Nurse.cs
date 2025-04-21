@@ -12,10 +12,11 @@ namespace Core.Models
         public required string LicenseNumber { get; set; }
         public int ExperienceYears { get; set; }
         public bool IsAvailable { get; set; }
-        public int visitCount = 0;
+        public int VisitCount { get; set; }
         public bool IsVerified { get; set; } = false;
         public virtual List<Visit> Visits { get; set; } = [];
         public virtual List<NurseCertificate> Certificates { get; set; } = [];
+        public virtual List<Service> Services { get; set; } = [];
 
     }
 }

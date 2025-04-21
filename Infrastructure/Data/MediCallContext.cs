@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Models;
+using Infrastructure.Data.Configurations;
 using Microsoft;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -31,102 +32,44 @@ namespace Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    modelBuilder.Entity(entityType.ClrType).Property("IsDeleted").HasDefaultValue(false);
+                    modelBuilder.Entity(entityType.ClrType).Property("CreatedAt").HasDefaultValueSql("GETDATE()");
+                    modelBuilder.Entity(entityType.ClrType).Property("UpdatedAt").HasDefaultValueSql("GETDATE()").ValueGeneratedOnUpdate();
+                }
+            }
+
+
             base.OnModelCreating(modelBuilder);
 
-            // Owned Types
-            modelBuilder.Entity<AppUser>()
-                .OwnsOne(u => u.Location);
+            modelBuilder.ApplyConfiguration(new AppUserConfig());
 
-            modelBuilder.Entity<Visit>()
-                .OwnsOne(v => v.PatientLocation);
+            modelBuilder.ApplyConfiguration(new CertificateConfig());
 
-            modelBuilder.Entity<Visit>()
-                .OwnsOne(v => v.NurseLocation);
+            modelBuilder.ApplyConfiguration(new ChatReferenceConfig());
 
-            // Visit
-            modelBuilder.Entity<Visit>()
-                .HasOne(v => v.Nurse)
-                .WithMany(n => n.Visits)
-                .HasForeignKey(v => v.NurseId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Visit>()
-                .HasOne(v => v.Patient)
-                .WithMany(p => p.Visits)
-                .HasForeignKey(v => v.PatientId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // NurseCertificate
-            modelBuilder.Entity<NurseCertificate>()
-                .HasKey(nc => new { nc.NurseId, nc.CertificateId });
-
-            modelBuilder.Entity<NurseCertificate>()
-                .HasOne(nc => nc.Nurse)
-                .WithMany(n => n.Certificates)
-                .HasForeignKey(nc => nc.NurseId);
-
-            modelBuilder.Entity<NurseCertificate>()
-                .HasOne(nc => nc.Certificate)
-                .WithMany()
-                .HasForeignKey(nc => nc.CertificateId);
-
-            // Notification
-            modelBuilder.Entity<Notification>()
-                .HasOne(n => n.User)
-                .WithMany(u => u.Notifications)
-                .HasForeignKey(n => n.UserId);
-
-            // ChatReference
-            modelBuilder.Entity<ChatReference>()
-                .HasOne(c => c.Patient)
-                .WithMany()
-                .HasForeignKey(c => c.PatientId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ChatReference>()
-                .HasOne(c => c.Nurse)
-                .WithMany()
-                .HasForeignKey(c => c.NurseId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // PatientIllnesses
-            modelBuilder.Entity<PatientIllnesses>()
-                .HasKey(pi => new { pi.PatientId, pi.IllnessId });
-
-            modelBuilder.Entity<PatientIllnesses>()
-                .HasOne(pi => pi.Patient)
-                .WithMany(p => p.PatientIllnesses)
-                .HasForeignKey(pi => pi.PatientId);
-
-            modelBuilder.Entity<PatientIllnesses>()
-                .HasOne(pi => pi.Illness)
-                .WithMany()
-                .HasForeignKey(pi => pi.IllnessId);
-
-            // Payment
-            modelBuilder.Entity<Payment>()
-                .HasOne(p => p.Visit)
-                .WithOne()
-                .HasForeignKey<Payment>(p => p.VisitId);
-
-            // Reviewing
-            modelBuilder.Entity<Reviewing>()
-                .Property(r => r.Rating)
-                .HasDefaultValue(0)
-                .IsRequired();
-
-
-            modelBuilder.Entity<Reviewing>()
-                .HasOne(r => r.Visit)
-                .WithOne()
-                .HasForeignKey<Reviewing>(r => r.VisitId);
-
-            // Visit - Services
-            modelBuilder.Entity<Visit>()
-                .HasMany(v => v.Services)
-                .WithMany();
-
-            // TODO: Add other configurations as needed ,Add Validation And remove the TODO comment
+            modelBuilder.ApplyConfiguration(new IllnessConfig());
+            
+            modelBuilder.ApplyConfiguration(new NotificationConfig());
+            
+            modelBuilder.ApplyConfiguration(new NurseCertificateConfig());
+            
+            modelBuilder.ApplyConfiguration(new NurseConfig());
+            
+            modelBuilder.ApplyConfiguration(new PatientConfig());
+            
+            modelBuilder.ApplyConfiguration(new PatientIllnessesConfig());
+            
+            modelBuilder.ApplyConfiguration(new PaymentConfig());
+            
+            modelBuilder.ApplyConfiguration(new ReviewingConfig());
+            
+            modelBuilder.ApplyConfiguration(new ServiceConfig());
+            
+            modelBuilder.ApplyConfiguration(new VisitConfig());
         }
     }
 }
