@@ -2,7 +2,7 @@ using System;
 
 namespace Core.Models;
 
-public class Illness
+public class Illness : BaseEntity
 {
     public int Id { get; set; }
     public required string Name { get; set; }
