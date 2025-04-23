@@ -22,7 +22,7 @@ namespace Core.Models
         public string? ProfilePicture { get; set; }
 
         public Location? Location { get; set; }
-        
+        public List<RefreshTocken>? RefreshTokens { get; set; } 
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

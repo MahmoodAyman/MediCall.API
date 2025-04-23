@@ -11,7 +11,7 @@ namespace Core.Models
     {
         public int Id { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
-        public decimal Amount => Visit.TotalCost;
+        public decimal Amount => Visit.CalculateTotalCost();
         public DateTime PaymentDate { get; set; }
         public PaymentStatus Status { get; set; } 
         public required string TransactionReference { get; set; }
