@@ -10,6 +10,8 @@ namespace Core.Interface
     public interface IJwtTokenService
     {
         Task<string> GenerateAccessTokenAsync(AppUser appUser);
+        Task<RefreshTocken> GenerateRefreshTokenAsync();
 
     }
 }
+ 

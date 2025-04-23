@@ -9,8 +9,6 @@ namespace Core.Interface
 {
     public interface IAuthService
     {
-        Task<(string accessToken, string refreshToken)> AuthenticateAsync(AppUser appUser);
-        Task<(string newAccessToken, string newRefreshToken)> RefreshTokenAsync(string token);
-
+        
     }
 }

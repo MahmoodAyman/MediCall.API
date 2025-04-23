@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Interface;
@@ -45,6 +46,21 @@ namespace Infrastructure.Services
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             return accessToken;
+        }
+
+        public Task<RefreshTocken> GenerateRefreshTokenAsync()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Task.FromResult(new RefreshTocken
+                {
+                    Token = Convert.ToBase64String(randomNumber),
+                    CreateOn = DateTime.UtcNow,
+                    ExpiresOn = DateTime.UtcNow.AddDays(_jwtSetting.RefreshTokenExpirationDays)
+                });
+            }
         }
     }
 }
