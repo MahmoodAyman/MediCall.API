@@ -1,4 +1,6 @@
+using Core.Interface;
 using Infrastructure.Data;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,9 @@ builder.Services.AddDbContext<MediCallContext>(options =>
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 var app = builder.Build();
 
