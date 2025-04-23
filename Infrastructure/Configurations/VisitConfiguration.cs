@@ -27,7 +27,7 @@ public class VisitConfiguration : IEntityTypeConfiguration<Visit>
 
         // Ignoring Comuted proprties
         builder.Ignore(v => v.ServiceCost);
-        builder.Ignore(v => v.TotalCost);
+        // builder.Ignore(v => v.TotalCost);
 
     }
 }
