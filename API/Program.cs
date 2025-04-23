@@ -10,6 +10,13 @@ namespace API
         private static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // Add services to the container.
+            builder.Services.AddDbContext<MediCallContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).UseLazyLoadingProxies());
+
+            builder.Services.AddControllers();
+            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            builder.Services.AddOpenApi();
 
             JwtSettings JwtOption = builder.Configuration.GetSection("JWT").Get<JwtSettings>() ?? throw new Exception("Error in JWT in app setting");
 
@@ -28,11 +35,6 @@ namespace API
                     ClockSkew = TimeSpan.Zero
                 };
             });
-            // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
 
             var app = builder.Build();
 

@@ -7,7 +7,7 @@ using Core.Enums;
 
 namespace Core.Models
 {
-    public class Certificate
+    public class Certificate : BaseEntity
     {
         public int Id { get; set; }
         public required string Name { get; set; }
