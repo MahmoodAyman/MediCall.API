@@ -51,16 +51,14 @@ namespace Infrastructure.Services
         public Task<RefreshTocken> GenerateRefreshTokenAsync()
         {
             var randomNumber = new byte[32];
-            using (var rng = RandomNumberGenerator.Create())
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Task.FromResult(new RefreshTocken
             {
-                rng.GetBytes(randomNumber);
-                return Task.FromResult(new RefreshTocken
-                {
-                    Token = Convert.ToBase64String(randomNumber),
-                    CreateOn = DateTime.UtcNow,
-                    ExpiresOn = DateTime.UtcNow.AddDays(_jwtSetting.RefreshTokenExpirationDays)
-                });
-            }
+                Token = Convert.ToBase64String(randomNumber),
+                CreateOn = DateTime.UtcNow,
+                ExpiresOn = DateTime.UtcNow.AddDays(_jwtSetting.RefreshTokenExpirationDays)
+            });
         }
     }
 }
