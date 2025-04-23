@@ -51,6 +51,23 @@ namespace Infrastructure.Data.Configurations
                     .IsRequired();
             });
 
+            builder.OwnsMany(u => u.RefreshTokens, rt =>
+            {
+                rt.WithOwner();
+
+                rt.Property(r => r.Token)
+                  .IsRequired()
+                  .HasMaxLength(512);
+
+                rt.Property(r => r.ExpiresOn)
+                .IsRequired();
+
+                rt.Property(r => r.CreateOn)
+                .IsRequired()
+                .HasDefaultValueSql("GETDATE()");
+
+            });
+
             builder.Property(u => u.IsDeleted)
                 .IsRequired()
                 .HasDefaultValue(false);

@@ -10,9 +10,10 @@ namespace Core.Models
     [Owned]
     public class RefreshTocken
     {
+        public int Id { get; set; }
         public string Token { get; set; } = null!;
-        public DateTime Expires { get; set; }
-        public bool IsExpired => DateTime.UtcNow >= Expires;
+        public DateTime ExpiresOn { get; set; }
+        public bool IsExpired => DateTime.UtcNow >= ExpiresOn;
         public DateTime CreateOn { get; set; }
         public DateTime? RevokedOn { get; set; }
         public bool IsActive => RevokedOn == null && !IsExpired;

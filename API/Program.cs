@@ -1,6 +1,8 @@
 using System.Text;
 using Infrastructure.Configurations;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API
