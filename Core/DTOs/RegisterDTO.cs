@@ -17,6 +17,7 @@ namespace Core.DTOs
         public required string PhoneNumber { get; set; }
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
+        public Role Role { get; set; }
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
         public required Location Location { get; set; }

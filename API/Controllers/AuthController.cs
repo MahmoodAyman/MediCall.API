@@ -52,6 +52,40 @@ namespace API.Controllers
             return Ok(new { Message = result.Massage });
         }
 
+        [HttpGet("RefreshToken")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest(new { Message = "No refresh token provided" });
+            }
+            var result = await _authService.RefreshTokenAsync(refreshToken);
+            if (!result.IsAuthenticated)
+            {
+                return BadRequest(new { Message = result.Massage });
+            }
+            if (result.RefreshToken is not null)
+            {
+                SetRefreshTokenCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            }
+            return Ok(result);
+        }
+        [HttpPost("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string email , [FromQuery] string token)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _authService.ConfirmEmailAsync(email,token);
+            if (!result.IsAuthenticated)
+            {
+                return BadRequest(new { Message = result.Massage });
+            }
+            return Ok(new { Message = result.Massage });
+        }
+
         private void SetRefreshTokenCookie(string refreshToken , DateTime Expires)
         {
             var cookieOptions = new CookieOptions

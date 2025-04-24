@@ -61,9 +61,40 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         return authDTO;
     }
 
-    public Task<AuthDTO> RefreshTokenAsync(string token)
+    public async Task<AuthDTO> RefreshTokenAsync(string token)
     {
-        throw new NotImplementedException();
+        var authDTO = new AuthDTO();
+
+        var user = _userManager.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+        if (user is null)
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Massage = "Invalid refresh token";
+            return authDTO;
+        }
+        var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
+        if (!refreshToken.IsActive)
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Massage = "Inactive refresh token";
+            return authDTO;
+        }
+
+        refreshToken.RevokedOn = DateTime.UtcNow;
+        var newRefreshToken = await _jwtTokenService.GenerateRefreshTokenAsync();
+        
+        user.RefreshTokens.Add(newRefreshToken);
+        await _userManager.UpdateAsync(user);
+        
+        authDTO.IsAuthenticated = true;
+        authDTO.Email = user.Email;
+        authDTO.UserName = user.UserName;
+        authDTO.Token = await _jwtTokenService.GenerateAccessTokenAsync(user);
+        authDTO.Roles = [.. (await _userManager.GetRolesAsync(user))];
+        authDTO.RefreshToken = newRefreshToken.Token;
+        authDTO.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+
+        return authDTO;
     }
 
     public async Task<AuthDTO> RegisterAsync(RegisterDTO registerDTO)
@@ -119,7 +150,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
             return authDTO ;
         }
 
-        await _userManager.AddToRoleAsync(user,Role.User.ToString());
+        await _userManager.AddToRoleAsync(user,registerDTO.Role.ToString());
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var param = new Dictionary<string, string?>
@@ -234,6 +265,28 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         }
 
         return errors;
+    }
+
+    public async Task<AuthDTO> ConfirmEmailAsync(string email, string token)
+    {
+        var authDTO = new AuthDTO();
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Massage = "User not found";
+            return authDTO;
+        }
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Massage = "Error confirming email";
+            return authDTO;
+        }
+        authDTO.IsAuthenticated = true;
+        authDTO.Massage = "Email confirmed successfully";
+        return authDTO;
     }
 
     [GeneratedRegex(@"^01[0-2,5]{1}[0-9]{8}$")]
