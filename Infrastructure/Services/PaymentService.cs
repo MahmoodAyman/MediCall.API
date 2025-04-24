@@ -173,7 +173,7 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
         var refundRequest = new
         {
             transaction_id = payment.TransactionReference,
-            amount_cents = payment.Amount
+            amount_cents = (int)payment.Amount * 100
         };
         var jsonContent = JsonSerializer.Serialize(refundRequest);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -198,7 +198,8 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
         public Guid Id { get; set; }
         public string RedirectURL { get; set; } = "";
     }
-    public class RefundResponse{
-        
+    public class RefundResponse
+    {
+
     }
 }
