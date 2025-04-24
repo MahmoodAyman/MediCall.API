@@ -12,10 +12,18 @@ namespace Core.Models
         public int Id { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
         public decimal Amount => Visit.CalculateTotalCost();
+
+        public decimal PlatformCommission => Visit.ServiceCost * 0.10m;
+
+        public decimal NurseTotalProfit => Amount - PlatformCommission;
         public DateTime PaymentDate { get; set; }
-        public PaymentStatus Status { get; set; } 
+        public PaymentStatus Status { get; set; }
         public required string TransactionReference { get; set; }
         public int VisitId { get; set; }
         public virtual Visit Visit { get; set; } = null!;
+
+        public bool NursePaid { get; set; } = false;
+        public DateTime? NursePaymentDate { get; set; }
+        public string? NursePaymentReference { get; set; }
     }
 }

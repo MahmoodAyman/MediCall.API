@@ -8,7 +8,9 @@ namespace Core.DTOs
 {
     public class LoginDTO
     {
-        public required string Email { get; set; }
-        public required string Password { get; set; }
+        [Required]
+        public string Email { get; set; } = string.Empty;
+        [Required]
+        public string Password { get; set; } = string.Empty;
     }
 }

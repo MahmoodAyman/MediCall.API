@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(MediCallContext))]
-    [Migration("20250421012644_initializeDatabase")]
-    partial class initializeDatabase
+    [Migration("20250424064709_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,7 +48,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<DateTime?>("DateOfBirth")
+                    b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("date");
 
                     b.Property<string>("Email")
@@ -854,7 +854,44 @@ namespace Infrastructure.Migrations
                                 .HasForeignKey("AppUserId");
                         });
 
+                    b.OwnsMany("Core.Models.RefreshTocken", "RefreshTokens", b1 =>
+                        {
+                            b1.Property<string>("AppUserId")
+                                .HasColumnType("char(14)");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<DateTime>("CreateOn")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("datetime2")
+                                .HasDefaultValueSql("GETDATE()");
+
+                            b1.Property<DateTime>("ExpiresOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime?>("RevokedOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("Token")
+                                .IsRequired()
+                                .HasMaxLength(512)
+                                .HasColumnType("nvarchar(512)");
+
+                            b1.HasKey("AppUserId", "Id");
+
+                            b1.ToTable("RefreshTocken");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AppUserId");
+                        });
+
                     b.Navigation("Location");
+
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("Core.Models.ChatReference", b =>
