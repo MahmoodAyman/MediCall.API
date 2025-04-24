@@ -34,6 +34,24 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register(RegisterDTO registerDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authService.RegisterAsync(registerDTO);
+
+            if (!result.IsAuthenticated)
+            {
+                return BadRequest(new { Message = result.Massage });
+            }
+
+            return Ok(new { Message = result.Massage });
+        }
+
         private void SetRefreshTokenCookie(string refreshToken , DateTime Expires)
         {
             var cookieOptions = new CookieOptions

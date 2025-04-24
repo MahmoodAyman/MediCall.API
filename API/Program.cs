@@ -30,10 +30,14 @@ namespace API
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
-            JwtSettings JwtOption = builder.Configuration.GetSection("JWT").Get<JwtSettings>() ?? throw new Exception("Error in JWT in app setting");
+            JwtSettings JwtOption = builder.Configuration.GetSection("JWT").Get<JwtSettings>() ?? throw new Exception("Error in JWT settings");
+            MailSettings mailSettings = builder.Configuration.GetSection("MailSettings").Get<MailSettings>() ?? throw new Exception("Error in Mail settings");
 
             builder.Services.AddSingleton<JwtSettings>(JwtOption);
+            builder.Services.AddSingleton<MailSettings>(mailSettings);
+
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IMailingService, MailingService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
