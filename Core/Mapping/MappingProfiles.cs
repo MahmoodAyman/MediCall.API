@@ -28,7 +28,13 @@ public class MappingProfiles : Profile
         CreateMap<Certificate, UpdatedCertificateDto>().ReverseMap();
 
         CreateMap<Illness, IllnessDto>().ReverseMap();
+        CreateMap<Illness, CreatedIllnessDto>().ReverseMap();
+        CreateMap<Illness, UpdatedIllnessDto>().ReverseMap();
+        CreateMap<Illness, IllnessDetailsDto>().ReverseMap();
         CreateMap<Nurse, NurseDto>().ReverseMap();
+        CreateMap<Nurse, NurseDetailsDto>()
+            .ForMember(dest => dest.DateOfBirth,opt =>opt.MapFrom(src => DateOnly.FromDateTime(src.DateOfBirth)))
+            .ReverseMap();
         CreateMap<Nurse, CreatedNurseDto>().ReverseMap();
     }
 }

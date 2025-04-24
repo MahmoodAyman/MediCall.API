@@ -24,7 +24,7 @@ namespace Core.DTOs.Nurse
         public virtual List<NurseCertificate> Certificates { get; set; } = new();
         [Display(Name = "Date Of Birth")]
         [DataType(DataType.Date)]
-        public DateOnly? DateOfBirth { get; set; }
+        public DateOnly DateOfBirth { get; set; }
         [Display(Name = "Profile Picture")]
         public string? ProfilePicture { get; set; }
     }
