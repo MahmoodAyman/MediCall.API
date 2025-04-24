@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Core.DTOs.Illness
 {
-    public class IllnessDto
+    public class UpdatedIllnessDto
     {
         public int Id { get; set; }
         [Required]

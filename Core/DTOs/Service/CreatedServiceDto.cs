@@ -9,8 +9,10 @@ namespace Core.DTOs.Service
 {
     public class CreatedServiceDto
     {
+        [Required]
         public required string Name { get; set; }
         public string Description { get; set; } = string.Empty;
+        [DataType(DataType.Currency)]
         public decimal BasePrice { get; set; }
     }
 }

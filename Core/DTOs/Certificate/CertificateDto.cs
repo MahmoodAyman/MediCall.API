@@ -9,6 +9,7 @@ namespace Core.DTOs.Certificate
     public class CertificateDto
     {
         public int Id { get; set; }
+        [Required]
         public required string Name { get; set; }
         public string? Description { get; set; }
     }

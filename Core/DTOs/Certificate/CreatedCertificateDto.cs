@@ -8,6 +8,7 @@ namespace Core.DTOs.Certificate
 {
     public class CreatedCertificateDto
     {
+        [Required]
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
     }
