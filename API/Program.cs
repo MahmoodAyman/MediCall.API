@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.Tasks;
 using Core.Interface;
 using Core.Models;
 using Infrastructure.Configurations;
@@ -14,7 +15,7 @@ namespace API
 {
     public class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             // Add services to the container.
@@ -75,6 +76,19 @@ namespace API
             app.UseAuthorization();
 
             app.MapControllers();
+            try
+            {
+                using var scope = app.Services.CreateScope();
+                var servcies = scope.ServiceProvider;
+                var context = servcies.GetRequiredService<MediCallContext>();
+                await context.Database.MigrateAsync();
+                await MediCallContextSeed.SeedDataAsync(context);
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
 
             app.Run();
         }

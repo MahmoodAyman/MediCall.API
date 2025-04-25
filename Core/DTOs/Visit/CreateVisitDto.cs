@@ -7,7 +7,8 @@ public class CreateVisitDto
 {
     public required Location PatientLocation { get; set; }
 
-    public List<string> Services { get; set; } = [];
+    public virtual List<Core.Models.Service> Services { get; set; } = [];
     public DateTime? ActualVisitDate { get; set; }
     public DateTime ScheduledDate { get; set; }
+    public required string PatientId { get; set; }
 }
