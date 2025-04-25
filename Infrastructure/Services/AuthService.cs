@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services;
 
-public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenService jwtTokenService, IMailingService mailingService) : IAuthService
+public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenService jwtTokenService, IMailingService mailingService) : IAuthService
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
@@ -22,14 +22,14 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         var authDTO = new AuthDTO();
         var user = await _userManager.FindByEmailAsync(loginDTO.Email);
 
-        if (user is null ||await _userManager.CheckPasswordAsync(user,loginDTO.Password))
+        if (user is null || await _userManager.CheckPasswordAsync(user, loginDTO.Password))
         {
             authDTO.IsAuthenticated = false;
-            authDTO.Massage="Email or password is incorrect";
+            authDTO.Massage = "Email or password is incorrect";
             return authDTO;
-        }       
+        }
 
-        if(await _userManager.IsEmailConfirmedAsync(user))
+        if (await _userManager.IsEmailConfirmedAsync(user))
         {
             authDTO.IsAuthenticated = false;
             authDTO.Massage = "The email is not confirmed. Check your inbox.";
@@ -41,7 +41,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         authDTO.UserName = user.UserName;
         authDTO.Token = await _jwtTokenService.GenerateAccessTokenAsync(user);
         authDTO.Roles = [.. (await _userManager.GetRolesAsync(user))];
-        
+
         if (user.RefreshTokens.Any(t => t.IsActive))
         {
             var activeRefreshToken = user.RefreshTokens.First(t => t.IsActive);
@@ -82,10 +82,10 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
 
         refreshToken.RevokedOn = DateTime.UtcNow;
         var newRefreshToken = await _jwtTokenService.GenerateRefreshTokenAsync();
-        
+
         user.RefreshTokens.Add(newRefreshToken);
         await _userManager.UpdateAsync(user);
-        
+
         authDTO.IsAuthenticated = true;
         authDTO.Email = user.Email;
         authDTO.UserName = user.UserName;
@@ -100,24 +100,24 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
     public async Task<AuthDTO> RegisterAsync(RegisterDTO registerDTO)
     {
         var authDTO = new AuthDTO();
-        
+
         var validateErrors = ValidateRegisterDTO(registerDTO);
         if (validateErrors is not null && validateErrors.Count > 0)
         {
             authDTO.IsAuthenticated = false;
-            authDTO.Massage=string.Empty;
+            authDTO.Massage = string.Empty;
             foreach (var error in validateErrors)
             {
                 authDTO.Massage += error + " , ";
             }
             return authDTO;
         }
-        
+
         if (await _userManager.FindByIdAsync(registerDTO.NationalId) is not null)
         {
             authDTO.IsAuthenticated = false;
             authDTO.Massage = "National ID already exists";
-            return authDTO ;
+            return authDTO;
         }
         if (await _userManager.FindByEmailAsync(registerDTO.Email) is not null)
         {
@@ -126,31 +126,32 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
             return authDTO;
         }
 
-        var user = new AppUser 
+        var user = new AppUser
         {
-            Id= registerDTO.NationalId,
-            Email= registerDTO.Email,
-            PhoneNumber= registerDTO.PhoneNumber,
-            FirstName= registerDTO.FirstName,
-            LastName= registerDTO.LastName,
-            DateOfBirth= registerDTO.DateOfBirth,
-            Gender= registerDTO.Gender,
-            Location= registerDTO.Location
+            Id = registerDTO.NationalId,
+            Email = registerDTO.Email,
+            UserName = registerDTO.Email,
+            PhoneNumber = registerDTO.PhoneNumber,
+            FirstName = registerDTO.FirstName,
+            LastName = registerDTO.LastName,
+            DateOfBirth = registerDTO.DateOfBirth,
+            Gender = registerDTO.Gender,
+            Location = registerDTO.Location
         };
 
-        var result = await _userManager.CreateAsync(user,registerDTO.Password);
+        var result = await _userManager.CreateAsync(user, registerDTO.Password);
         if (!result.Succeeded)
         {
-             authDTO.IsAuthenticated= false;
+            authDTO.IsAuthenticated = false;
             authDTO.Massage = string.Empty;
             foreach (var error in result.Errors)
             {
-                authDTO.Massage += error .Description+ " , ";
+                authDTO.Massage += error.Description + " , ";
             }
-            return authDTO ;
+            return authDTO;
         }
 
-        await _userManager.AddToRoleAsync(user,registerDTO.Role.ToString());
+        await _userManager.AddToRoleAsync(user, registerDTO.Role.ToString());
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var param = new Dictionary<string, string?>
@@ -161,11 +162,11 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
 
         var callbackUrl = QueryHelpers.AddQueryString("https://localhost:7116/api/Auth/ConfirmEmail", param);
 
-        await _mailingService.SendEmailAsync(user.Email,"Confirm your email" ,$"<a href=\"{callbackUrl}\">Confirm From Here</a>",null);
+        await _mailingService.SendEmailAsync(user.Email, "Confirm your email", $"<a href=\"{callbackUrl}\">Confirm From Here</a>", null);
 
         authDTO.IsAuthenticated = true;
         authDTO.Massage = "Register Successfully. Check your inbox to confirm your mail";
-        return authDTO ;
+        return authDTO;
 
     }
     private static List<string> ValidateRegisterDTO(RegisterDTO dto)
