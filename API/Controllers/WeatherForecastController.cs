@@ -1,7 +1,9 @@
+using Core.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
-
+[Authorize(Roles ="User")]
 [ApiController]
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase

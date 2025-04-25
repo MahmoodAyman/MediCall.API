@@ -71,7 +71,7 @@ namespace API.Controllers
             }
             return Ok(result);
         }
-        [HttpPost("ConfirmEmail")]
+        [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string email , [FromQuery] string token)
         {
             if (!ModelState.IsValid)
