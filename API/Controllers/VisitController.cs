@@ -23,5 +23,7 @@ namespace API.Controllers
             var nurses = await _visitService.GetNearNurses(visit);
             return Ok(nurses);
         }
+    
+    
     }
 }

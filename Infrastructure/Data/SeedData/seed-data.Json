@@ -1,5 +1,125 @@
 {
-
+  "AppUsers": [
+    {
+      "Id": "29901010101010",
+      "UserName": "nurse.ahmed",
+      "Email": "ahmed@example.com",
+      "FirstName": "Ahmed",
+      "LastName": "Mohamed",
+      "DateOfBirth": "1985-05-15",
+      "Gender": "Male",
+      "Location": { "Lat": 30.04442, "Lng": 31.235712 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-01-01T00:00:00",
+      "Discriminator": "Nurse",
+      "LicenseNumber": "RN123456",
+      "ExperienceYears": 8,
+      "IsAvailable": true,
+      "VisitCount": 42,
+      "IsVerified": true
+    },
+    {
+      "Id": "29902020202020",
+      "UserName": "nurse.sara",
+      "Email": "sara.nurse@example.com",
+      "FirstName": "Sara",
+      "LastName": "Kamal",
+      "DateOfBirth": "1990-11-20",
+      "Gender": "Female",
+      "Location": { "Lat": 30.048941, "Lng": 31.238765 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-01-15T00:00:00",
+      "Discriminator": "Nurse",
+      "LicenseNumber": "RN789012",
+      "ExperienceYears": 5,
+      "IsAvailable": true,
+      "VisitCount": 28,
+      "IsVerified": true
+    },
+    {
+      "Id": "29903030303030",
+      "UserName": "nurse.mohamed",
+      "Email": "mohamed.nurse@example.com",
+      "FirstName": "Mohamed",
+      "LastName": "Ali",
+      "DateOfBirth": "1988-07-10",
+      "Gender": "Male",
+      "Location": { "Lat": 30.042356, "Lng": 31.233421 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-02-01T00:00:00",
+      "Discriminator": "Nurse",
+      "LicenseNumber": "RN345678",
+      "ExperienceYears": 10,
+      "IsAvailable": false,
+      "VisitCount": 65,
+      "IsVerified": true
+    },
+    {
+      "Id": "30001010101010",
+      "UserName": "patient.ali",
+      "Email": "ali@example.com",
+      "FirstName": "Ali",
+      "LastName": "Hassan",
+      "DateOfBirth": "1992-03-25",
+      "Gender": "Male",
+      "Location": { "Lat": 30.049543, "Lng": 31.240123 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-01-05T00:00:00",
+      "Discriminator": "Patient"
+    },
+    {
+      "Id": "30002020202020",
+      "UserName": "patient.layla",
+      "Email": "layla@example.com",
+      "FirstName": "Layla",
+      "LastName": "Mahmoud",
+      "DateOfBirth": "1987-09-12",
+      "Gender": "Female",
+      "Location": { "Lat": 30.047231, "Lng": 31.237654 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-01-10T00:00:00",
+      "Discriminator": "Patient"
+    },
+    {
+      "Id": "30003030303030",
+      "UserName": "patient.omar",
+      "Email": "omar@example.com",
+      "FirstName": "Omar",
+      "LastName": "Sayed",
+      "DateOfBirth": "1975-12-30",
+      "Gender": "Male",
+      "Location": { "Lat": 30.045678, "Lng": 31.236789 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-01-20T00:00:00",
+      "Discriminator": "Patient"
+    },
+    {
+      "Id": "30004040404040",
+      "UserName": "patient.nada",
+      "Email": "nada@example.com",
+      "FirstName": "Nada",
+      "LastName": "Adel",
+      "DateOfBirth": "1995-06-18",
+      "Gender": "Female",
+      "Location": { "Lat": 30.04321, "Lng": 31.234567 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-02-05T00:00:00",
+      "Discriminator": "Patient"
+    },
+    {
+      "Id": "30005050505050",
+      "UserName": "patient.hassan",
+      "Email": "hassan@example.com",
+      "FirstName": "Hassan",
+      "LastName": "Ibrahim",
+      "DateOfBirth": "1968-04-22",
+      "Gender": "Male",
+      "Location": { "Lat": 30.041234, "Lng": 31.232345 },
+      "IsDeleted": false,
+      "CreatedAt": "2023-02-10T00:00:00",
+      "Discriminator": "Patient"
+    }
+  ],
   "Certificates": [
     {
       "Id": 1,
@@ -106,25 +226,25 @@
       "Id": 1,
       "Name": "Wound Dressing",
       "Description": "Professional wound care and dressing change",
-      "BasePrice": 150.00
+      "BasePrice": 150.0
     },
     {
       "Id": 2,
       "Name": "IV Therapy",
       "Description": "Intravenous medication administration",
-      "BasePrice": 250.00
+      "BasePrice": 250.0
     },
     {
       "Id": 3,
       "Name": "Elderly Care",
       "Description": "Daily assistance for elderly patients",
-      "BasePrice": 200.00
+      "BasePrice": 200.0
     },
     {
       "Id": 4,
       "Name": "Post-Op Care",
       "Description": "Recovery monitoring after surgery",
-      "BasePrice": 300.00
+      "BasePrice": 300.0
     }
   ],
   "Visits": [
@@ -133,9 +253,9 @@
       "ScheduledDate": "2023-06-15T10:00:00",
       "ActualVisitDate": "2023-06-15T10:15:00",
       "Status": "Done",
-      "TransportationCost": 50.00,
+      "TransportationCost": 50.0,
       "PatientLocation": { "Lat": 30.049543, "Lng": 31.240123 },
-      "NurseLocation": { "Lat": 30.044420, "Lng": 31.235712 },
+      "NurseLocation": { "Lat": 30.04442, "Lng": 31.235712 },
       "NurseId": "29901010101010",
       "PatientId": "30001010101010",
       "ServiceIds": [1, 2]
@@ -145,7 +265,7 @@
       "ScheduledDate": "2023-06-20T14:00:00",
       "ActualVisitDate": "2023-06-20T14:30:00",
       "Status": "Done",
-      "TransportationCost": 60.00,
+      "TransportationCost": 60.0,
       "PatientLocation": { "Lat": 30.047231, "Lng": 31.237654 },
       "NurseLocation": { "Lat": 30.048941, "Lng": 31.238765 },
       "NurseId": "29902020202020",
@@ -156,7 +276,7 @@
       "Id": 3,
       "ScheduledDate": "2023-07-05T09:00:00",
       "Status": "Pending",
-      "TransportationCost": 45.00,
+      "TransportationCost": 45.0,
       "PatientLocation": { "Lat": 30.045678, "Lng": 31.236789 },
       "NurseLocation": { "Lat": 30.042356, "Lng": 31.233421 },
       "NurseId": "29903030303030",
