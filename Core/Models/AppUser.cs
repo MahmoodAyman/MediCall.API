@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Core.Models
 {
-    public class AppUser : IdentityUser , IDeleteable , IAuditable
+    public class AppUser : IdentityUser, IDeleteable, IAuditable
     {
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
@@ -22,7 +22,7 @@ namespace Core.Models
         public string? ProfilePicture { get; set; }
 
         public Location? Location { get; set; }
-        public List<RefreshTocken> RefreshTokens { get; set; } = []; 
+        public List<RefreshTocken> RefreshTokens { get; set; } = [];
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

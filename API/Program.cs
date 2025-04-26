@@ -79,10 +79,13 @@ namespace API
             try
             {
                 using var scope = app.Services.CreateScope();
-                var servcies = scope.ServiceProvider;
-                var context = servcies.GetRequiredService<MediCallContext>();
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<MediCallContext>();
+                var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                 await context.Database.MigrateAsync();
-                await MediCallContextSeed.SeedDataAsync(context);
+
+                await MediCallContextSeed.SeedDataAsync(context, userManager, roleManager);
             }
             catch (System.Exception ex)
             {
