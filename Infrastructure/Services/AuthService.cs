@@ -26,14 +26,14 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         if (user is null ||! await _userManager.CheckPasswordAsync(user,loginDTO.Password))
         {
             authDTO.IsAuthenticated = false;
-            authDTO.Massage="Email or password is incorrect";
+            authDTO.Message="Email or password is incorrect";
             return authDTO;
         }       
 
         if(!await _userManager.IsEmailConfirmedAsync(user))
         {
             authDTO.IsAuthenticated = false;
-            authDTO.Massage = "The email is not confirmed. Check your inbox.";
+            authDTO.Message = "The email is not confirmed. Check your inbox.";
             return authDTO;
         }
 
@@ -58,7 +58,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
             await _userManager.UpdateAsync(user);
         }
 
-        authDTO.Massage = "Login successfully";
+        authDTO.Message = "Login successfully";
         return authDTO;
     }
 
@@ -70,14 +70,14 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         if (user is null)
         {
             authDTO.IsAuthenticated = false;
-            authDTO.Massage = "Invalid refresh token";
+            authDTO.Message = "Invalid refresh token";
             return authDTO;
         }
         var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
         if (!refreshToken.IsActive)
         {
             authDTO.IsAuthenticated = false;
-            authDTO.Massage = "Inactive refresh token";
+            authDTO.Message = "Inactive refresh token";
             return authDTO;
         }
 
@@ -99,44 +99,28 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
     }
 
     public async Task<AuthDTO> RegisterAsync(RegisterDTO registerDTO)
-    {
-        var authDTO = new AuthDTO();
-        
+    {       
         var validateErrors = ValidateRegisterDTO(registerDTO);
         if (validateErrors is not null && validateErrors.Count > 0)
         {
-            authDTO.IsAuthenticated = false;
-            authDTO.Massage=string.Empty;
-            foreach (var error in validateErrors)
-            {
-                authDTO.Massage += error + " , ";
-            }
-            return authDTO;
+            return FailResult(string.Join(", ", validateErrors));
         }
         
         if (await _userManager.FindByIdAsync(registerDTO.NationalId) is not null)
         {
-            authDTO.IsAuthenticated = false;
-            authDTO.Massage = "National ID already exists";
-            return authDTO ;
+            return FailResult("National ID already exists");
         }
         if (await _userManager.FindByEmailAsync(registerDTO.Email) is not null)
         {
-            authDTO.IsAuthenticated = false;
-            authDTO.Massage = "Email already exists";
-            return authDTO;
+            return FailResult("Email already exists");
         }
         if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerDTO.PhoneNumber))
         {
-            authDTO.IsAuthenticated = false;
-            authDTO.Massage = "Phone number already exists";
-            return authDTO;
+            return FailResult("Phone number already exists");
         }
         if (await _userManager.Users.AnyAsync(u => u.UserName == registerDTO.UserName))
         {
-            authDTO.IsAuthenticated = false;
-            authDTO.Massage = "User name already exists";
-            return authDTO;
+            return FailResult("User name already exists");
         }
 
 
@@ -156,13 +140,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         var result = await _userManager.CreateAsync(user,registerDTO.Password);
         if (!result.Succeeded)
         {
-             authDTO.IsAuthenticated= false;
-            authDTO.Massage = string.Empty;
-            foreach (var error in result.Errors)
-            {
-                authDTO.Massage += error .Description+ " , ";
-            }
-            return authDTO ;
+            return FailResult(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
         await _userManager.AddToRoleAsync(user,registerDTO.Role.ToString());
@@ -176,13 +154,49 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
 
         var callbackUrl = QueryHelpers.AddQueryString("https://localhost:7116/api/Auth/ConfirmEmail", param);
 
-        await _mailingService.SendEmailAsync(user.Email,"Confirm your email" ,$"<a href=\"{callbackUrl}\">Confirm From Here</a>",null);
+        string emailBody = $@"
+        <html>
+            <body style=""font-family: Arial, sans-serif;"">
+                <h2>Welcome {user.FirstName}!</h2>
+                <p>Thanks for registering. Please confirm your email by clicking the link below:</p>
+                <a href=""{callbackUrl}"" style=""padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;"">Confirm Email</a>
+                <p>If you did not request this, please ignore this email.</p>
+            </body>
+        </html>";
 
-        authDTO.IsAuthenticated = true;
-        authDTO.Massage = "Register Successfully. Check your inbox to confirm your mail";
+        await _mailingService.SendEmailAsync(user.Email, "Confirm your email", emailBody, null);
+
+        var authDTO = new AuthDTO
+        {
+            IsAuthenticated = true,
+            Message = "Register Successfully. Check your inbox to confirm your mail"
+        };
+
         return authDTO ;
 
     }
+    public async Task<AuthDTO> ConfirmEmailAsync(string email, string token)
+    {
+        var authDTO = new AuthDTO();
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Message = "User not found";
+            return authDTO;
+        }
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Message = "Error confirming email";
+            return authDTO;
+        }
+        authDTO.IsAuthenticated = true;
+        authDTO.Message = "Email confirmed successfully";
+        return authDTO;
+    }
+
     private static List<string> ValidateRegisterDTO(RegisterDTO dto)
     {
         var errors = new List<string>();
@@ -282,26 +296,13 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         return errors;
     }
 
-    public async Task<AuthDTO> ConfirmEmailAsync(string email, string token)
+    private static AuthDTO FailResult(string message)
     {
-        var authDTO = new AuthDTO();
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
+        return new AuthDTO()
         {
-            authDTO.IsAuthenticated = false;
-            authDTO.Massage = "User not found";
-            return authDTO;
-        }
-        var result = await _userManager.ConfirmEmailAsync(user, token);
-        if (!result.Succeeded)
-        {
-            authDTO.IsAuthenticated = false;
-            authDTO.Massage = "Error confirming email";
-            return authDTO;
-        }
-        authDTO.IsAuthenticated = true;
-        authDTO.Massage = "Email confirmed successfully";
-        return authDTO;
+            IsAuthenticated = false,
+            Message = message
+        };
     }
 
     [GeneratedRegex(@"^01[0-2,5]{1}[0-9]{8}$")]

@@ -22,7 +22,7 @@ namespace API.Controllers
             var result = await _authService.LoginAsync(loginDTO);
             if(!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
             
             if(result.RefreshToken is not null)
@@ -46,10 +46,10 @@ namespace API.Controllers
 
             if (!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
 
-            return Ok(new { Message = result.Massage });
+            return Ok(new { result.Message });
         }
 
         [HttpGet("RefreshToken")]
@@ -63,7 +63,7 @@ namespace API.Controllers
             var result = await _authService.RefreshTokenAsync(refreshToken);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
             if (result.RefreshToken is not null)
             {
@@ -81,9 +81,9 @@ namespace API.Controllers
             var result = await _authService.ConfirmEmailAsync(email,token);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
-            return Ok(new { Message = result.Massage });
+            return Ok(new { result.Message });
         }
 
         private void SetRefreshTokenCookie(string refreshToken , DateTime Expires)
