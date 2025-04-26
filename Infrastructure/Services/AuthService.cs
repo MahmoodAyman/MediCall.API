@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,6 +8,7 @@ using Core.Interface;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services;
@@ -22,14 +23,14 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
         var authDTO = new AuthDTO();
         var user = await _userManager.FindByEmailAsync(loginDTO.Email);
 
-        if (user is null || await _userManager.CheckPasswordAsync(user, loginDTO.Password))
+        if (user is null ||! await _userManager.CheckPasswordAsync(user,loginDTO.Password))
         {
             authDTO.IsAuthenticated = false;
             authDTO.Massage = "Email or password is incorrect";
             return authDTO;
         }
 
-        if (await _userManager.IsEmailConfirmedAsync(user))
+        if(!await _userManager.IsEmailConfirmedAsync(user))
         {
             authDTO.IsAuthenticated = false;
             authDTO.Massage = "The email is not confirmed. Check your inbox.";
@@ -125,18 +126,31 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
             authDTO.Massage = "Email already exists";
             return authDTO;
         }
+        if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerDTO.PhoneNumber))
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Massage = "Phone number already exists";
+            return authDTO;
+        }
+        if (await _userManager.Users.AnyAsync(u => u.UserName == registerDTO.UserName))
+        {
+            authDTO.IsAuthenticated = false;
+            authDTO.Massage = "User name already exists";
+            return authDTO;
+        }
+
 
         var user = new AppUser
         {
-            Id = registerDTO.NationalId,
-            Email = registerDTO.Email,
-            UserName = registerDTO.Email,
+            Id= registerDTO.NationalId,
+            Email= registerDTO.Email,
+            UserName = registerDTO.UserName,
             PhoneNumber = registerDTO.PhoneNumber,
-            FirstName = registerDTO.FirstName,
-            LastName = registerDTO.LastName,
-            DateOfBirth = registerDTO.DateOfBirth,
-            Gender = registerDTO.Gender,
-            Location = registerDTO.Location
+            FirstName= registerDTO.FirstName,
+            LastName= registerDTO.LastName,
+            DateOfBirth= registerDTO.DateOfBirth,
+            Gender= registerDTO.Gender,
+            Location= registerDTO.Location
         };
 
         var result = await _userManager.CreateAsync(user, registerDTO.Password);
