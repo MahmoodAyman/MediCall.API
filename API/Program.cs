@@ -1,5 +1,6 @@
 using System.Text;
 using System.Threading.Tasks;
+using API.SignalR;
 using Core.Interface;
 using Core.Models;
 using Infrastructure.Configurations;
@@ -41,6 +42,7 @@ namespace API
             JwtSettings JwtOption = builder.Configuration.GetSection("JWT").Get<JwtSettings>() ?? throw new Exception("Error in JWT settings");
             MailSettings mailSettings = builder.Configuration.GetSection("MailSettings").Get<MailSettings>() ?? throw new Exception("Error in Mail settings");
 
+            builder.Services.AddSignalR();
             builder.Services.AddSingleton<JwtSettings>(JwtOption);
             builder.Services.AddSingleton<MailSettings>(mailSettings);
 
@@ -87,22 +89,8 @@ namespace API
             app.UseAuthorization();
 
             app.MapControllers();
-            // try
-            // {
-            //     using var scope = app.Services.CreateScope();
-            //     var services = scope.ServiceProvider;
-            //     var context = services.GetRequiredService<MediCallContext>();
-            //     var userManager = services.GetRequiredService<UserManager<AppUser>>();
-            //     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            //     await context.Database.MigrateAsync();
+            app.MapHub<VisitHub>("/VisitHub");
 
-            //     await MediCallContextSeed.SeedDataAsync(context, userManager, roleManager);
-            // }
-            // catch (System.Exception ex)
-            // {
-            //     Console.WriteLine(ex);
-            //     throw;
-            // }
 
             app.Run();
         }

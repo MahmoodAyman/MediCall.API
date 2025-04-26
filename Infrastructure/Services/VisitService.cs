@@ -19,19 +19,52 @@ public class VisitService : IVisitService
         _context = context;
         _userManager = userManager;
     }
-    public async Task<Visit> CreateVisitAsync(ConfirmVisitDto visitDto, string nurseId)
+
+    public async Task<(bool Success, string Message, Visit visit, NurseDetailsDto NurseDetails)> AcceptVisitByNurse(int visitId, string nurseId)
+
+    {
+        var visit = await _context.Visits.FirstOrDefaultAsync(v => v.Id == visitId && v.Status == Core.Enums.VisitStatus.Pending);
+        if (visit == null)
+        {
+            return (false, "Visit not found may be already accepted", null, null);
+        }
+        var nurse = await _context.Nurses.Include(n => n.Services).FirstOrDefaultAsync(n => n.Id == nurseId && n.IsAvailable && n.IsVerified);
+        if (nurse == null)
+        {
+            return (false, "Nurse not verfied, not avilable, or may be not found", null, null);
+        }
+
+        visit.NurseId = nurseId;
+        visit.Status = Core.Enums.VisitStatus.PaymentPending;
+        visit.NurseLocation = nurse.Location;
+        await _context.SaveChangesAsync();
+
+        var NurseDetails = new NurseDetailsDto
+        {
+            Id = nurse.Id,
+            FirstName = nurse.FirstName,
+            LastName = nurse.LastName,
+            ExperienceYears = nurse.ExperienceYears,
+            VisitCount = nurse.VisitCount,
+        };
+        return (true, "visit Accepted successfully", visit, NurseDetails);
+
+    }
+
+    public async Task<string> CreatePendingVisitAsync(CreateVisitDto visitDto)
     {
         var visit = new Visit
         {
             PatientId = visitDto.PatientId,
-            NurseId = nurseId,
             PatientLocation = visitDto.PatientLocation,
-            NurseLocation = visitDto.NurseLocation,
-            //  Continue assinging Data
+            ScheduledDate = visitDto.ScheduledDate,
+            Status = Core.Enums.VisitStatus.Pending,
+            NurseLocation = null,
+            NurseId = null,
         };
         await _context.Visits.AddAsync(visit);
         await _context.SaveChangesAsync();
-        return visit;
+        return visit.Id.ToString();
     }
 
 
