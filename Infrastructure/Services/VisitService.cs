@@ -26,14 +26,16 @@ public class VisitService : IVisitService
         var visit = await _context.Visits.FirstOrDefaultAsync(v => v.Id == visitId && v.Status == Core.Enums.VisitStatus.Pending);
         if (visit == null)
         {
-            return (false, "Visit not found may be already accepted", null, null);
+            return (false, "Visit not found may be already accepted", null!, null!);
         }
-        var nurse = await _context.Nurses.Include(n => n.Services).FirstOrDefaultAsync(n => n.Id == nurseId && n.IsAvailable && n.IsVerified);
+        var nurse = await _context.Nurses.FirstOrDefaultAsync(n => n.Id == nurseId && n.IsAvailable && n.IsVerified);
         if (nurse == null)
         {
-            return (false, "Nurse not verfied, not avilable, or may be not found", null, null);
+            return (false, "Nurse not verfied, not avilable, or may be not found", null!, null!);
         }
+        var transportationCost = CacluateDistance(visit.PatientLocation, nurse.Location) * 3;
 
+        visit.TransportationCost = (decimal)transportationCost;
         visit.NurseId = nurseId;
         visit.Status = Core.Enums.VisitStatus.PaymentPending;
         visit.NurseLocation = nurse.Location;
@@ -59,8 +61,8 @@ public class VisitService : IVisitService
             PatientLocation = visitDto.PatientLocation,
             ScheduledDate = visitDto.ScheduledDate,
             Status = Core.Enums.VisitStatus.Pending,
-            NurseLocation = null,
-            NurseId = null,
+            NurseLocation = new Location { Lat = 0, Lng = 0 },
+            NurseId = "29901010101010"
         };
         await _context.Visits.AddAsync(visit);
         await _context.SaveChangesAsync();

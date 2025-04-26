@@ -27,7 +27,7 @@ public class Visit : BaseEntity
     public virtual List<Service> Services { get; set; } = [];
     public virtual Nurse Nurse { get; set; } = null!;
     public virtual Patient Patient { get; set; } = null!;
-    public PaymentStatus PaymentStatus { get; set; }
+    // public PaymentStatus PaymentStatus { get; set; }
 
     public virtual Payment Payment { get; set; } = null!;
     public virtual Reviewing Reviewing { get; set; } = null!;
