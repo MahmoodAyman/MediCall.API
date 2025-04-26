@@ -12,7 +12,8 @@ namespace API.Controllers
     {
         private readonly IVisitService _visitService;
 
-        public VisitController (IVisitService visitService){
+        public VisitController(IVisitService visitService)
+        {
             _visitService = visitService;
         }
         [HttpPost("find-nurse")]

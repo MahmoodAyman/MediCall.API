@@ -1,4 +1,5 @@
 using System;
+using Core.DTOs.Nurse;
 using Core.DTOs.Visit;
 using Core.Interface;
 using Core.Models;
@@ -34,19 +35,35 @@ public class VisitService : IVisitService
     }
 
 
-    public async Task<IReadOnlyList<Nurse>> GetNearNurses(CreateVisitDto visit)
+    public async Task<IReadOnlyList<NurseDetailsDto>> GetNearNurses(CreateVisitDto visit)
     {
-        var patient = await _userManager.Users.FirstOrDefaultAsync(p => p.Id == visit.PatientId);
-        var Nurses = await _context.Nurses.Where(n => n.IsAvailable && n.IsVerified).Where(n => n.Location != null).ToListAsync();
-        var matchedNurses = Nurses.Where(nurse => visit.Services.All(requestedServices => nurse.Services.Any(nurseService => nurseService.Id == requestedServices.Id)));
-
-        var sortNurses = matchedNurses.Select(nurse => new
+        var patient = await _context.Users.FirstOrDefaultAsync(p => p.Id == visit.PatientId);
+        var nurses = _context.Nurses.Where(n => n.IsAvailable && n.IsVerified).ToList();
+        // nurses = nurses.Where(n => visit.Services.All(requestedService => n.Services.Any(s => s.Id == requestedService.Id)));
+        var nursesOrderedByLocation = nurses.Select(n => new
         {
-            Nurse = nurse,
-            Distance = CacluateDistance(visit.PatientLocation, nurse.Location)
-        }).OrderBy(x => x.Distance).Select(x => x.Nurse).ToList();
+            Nurse = n,
+            Distance = CacluateDistance(visit.PatientLocation, n.Location)
+        }).Where(x => x.Distance < 10).OrderBy(x => x.Distance).Select(x => x.Nurse).ToList();
+        var visitServiceIds = visit.Services.Select(s => s.Id).ToList();
 
-        return sortNurses;
+        nursesOrderedByLocation = nursesOrderedByLocation
+            .Where(n => visitServiceIds.All(visitServiceId => n.Services.Any(ns => ns.Id == visitServiceId))).ToList();
+
+        var matchedNurses = new List<NurseDetailsDto>();
+
+        foreach (var nurse in nursesOrderedByLocation)
+        {
+            matchedNurses.Add(new NurseDetailsDto
+            {
+                FirstName = nurse.FirstName,
+                LastName = nurse.LastName,
+                Id = nurse.Id,
+                ExperienceYears = nurse.ExperienceYears,
+                VisitCount = nurse.VisitCount,
+            });
+        }
+        return [.. matchedNurses];
     }
 
 
@@ -70,6 +87,19 @@ public class VisitService : IVisitService
         var Distance = 6371 * c;
 
         return Distance;
+    }
+
+
+    private bool CompareServices(List<Service> NurseProvidedServices, List<Service> VisitRequestedServices)
+    {
+        foreach (var service in VisitRequestedServices)
+        {
+            if (!NurseProvidedServices.Contains(service))
+            {
+                return false;
+            }
+        }
+        return true;
     }
     private double DegreesToRadians(double degree)
     {
