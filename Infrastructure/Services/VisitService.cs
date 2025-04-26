@@ -8,8 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class VisitService(MediCallContext _context, UserManager<AppUser> _userManager) : IVisitService
+public class VisitService : IVisitService
 {
+    private readonly MediCallContext _context;
+    private readonly UserManager<AppUser> _userManager;
+
+    public VisitService(MediCallContext context, UserManager<AppUser> userManager)
+    {
+        _context = context;
+        _userManager = userManager;
+    }
     public async Task<Visit> CreateVisitAsync(ConfirmVisitDto visitDto, string nurseId)
     {
         var visit = new Visit

@@ -18,6 +18,7 @@ DELETE FROM Certificates;
 DELETE FROM Patients;
 DELETE FROM Nurses;
 DELETE FROM AspNetUsers;
+DELETE FROM [dbo].[NurseServices];
 
 -- 2. Seed Identity Roles
 INSERT INTO AspNetRoles (Id, [Name], NormalizedName, ConcurrencyStamp)
@@ -218,6 +219,26 @@ VALUES
   (4,'Post-Op Care',  'Recovery monitoring after surgery',300.00);
 SET IDENTITY_INSERT Services OFF;
 GO
+
+INSERT INTO [dbo].[NurseServices] (NursesId, ServicesId)
+VALUES
+  -- Ahmed (29901010101010)
+  ('29901010101010', 1),
+  ('29901010101010', 2),
+  ('29901010101010', 3),
+  ('29901010101010', 4),
+
+  -- Sara (29902020202020)
+  ('29902020202020', 1),
+  ('29902020202020', 2),
+  ('29902020202020', 3),
+  ('29902020202020', 4),
+
+  -- Mohamed (29903030303030)
+  ('29903030303030', 1),
+  ('29903030303030', 2),
+  ('29903030303030', 3),
+  ('29903030303030', 4);
 
 -- 12. Visits
 SET IDENTITY_INSERT Visits ON;

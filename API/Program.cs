@@ -27,7 +27,11 @@ namespace API
                 .AddDefaultTokenProviders();
 
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+                options.JsonSerializerOptions.WriteIndented = true;
+            });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -43,6 +47,7 @@ namespace API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IMailingService, MailingService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.AddScoped<IVisitService, VisitService>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 
@@ -82,22 +87,22 @@ namespace API
             app.UseAuthorization();
 
             app.MapControllers();
-            try
-            {
-                using var scope = app.Services.CreateScope();
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<MediCallContext>();
-                var userManager = services.GetRequiredService<UserManager<AppUser>>();
-                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                await context.Database.MigrateAsync();
+            // try
+            // {
+            //     using var scope = app.Services.CreateScope();
+            //     var services = scope.ServiceProvider;
+            //     var context = services.GetRequiredService<MediCallContext>();
+            //     var userManager = services.GetRequiredService<UserManager<AppUser>>();
+            //     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            //     await context.Database.MigrateAsync();
 
-                await MediCallContextSeed.SeedDataAsync(context, userManager, roleManager);
-            }
-            catch (System.Exception ex)
-            {
-                Console.WriteLine(ex);
-                throw;
-            }
+            //     await MediCallContextSeed.SeedDataAsync(context, userManager, roleManager);
+            // }
+            // catch (System.Exception ex)
+            // {
+            //     Console.WriteLine(ex);
+            //     throw;
+            // }
 
             app.Run();
         }

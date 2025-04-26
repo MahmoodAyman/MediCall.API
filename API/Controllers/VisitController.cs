@@ -1,5 +1,6 @@
 using Core.DTOs.Visit;
 using Core.Interface;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,8 +8,13 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VisitController(IVisitService _visitService) : ControllerBase
+    public class VisitController : ControllerBase
     {
+        private readonly IVisitService _visitService;
+
+        public VisitController (IVisitService visitService){
+            _visitService = visitService;
+        }
         [HttpPost("find-nurse")]
         public async Task<IActionResult> FindNearestNurses(CreateVisitDto visit)
         {
@@ -23,7 +29,7 @@ namespace API.Controllers
             var nurses = await _visitService.GetNearNurses(visit);
             return Ok(nurses);
         }
-    
-    
+
+
     }
 }
