@@ -22,7 +22,7 @@ namespace API.Controllers
             var result = await _authService.LoginAsync(loginDTO);
             if(!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
             
             if(result.RefreshToken is not null)
@@ -34,22 +34,39 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterDTO registerDTO)
+        [HttpPost("PatientRegister")]
+        public async Task<IActionResult> PatientRegister(RegisterDTO registerDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _authService.RegisterAsync(registerDTO);
+            var result = await _authService.PatientRegisterAsync(registerDTO);
 
             if (!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
 
-            return Ok(new { Message = result.Massage });
+            return Ok(new { result.Message });
+        }
+        [HttpPost("NurseRegister")]
+        public async Task<IActionResult> NurseRegister(NurseRegisterDTO registerDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authService.NurseRegisterAsync(registerDTO);
+
+            if (!result.IsAuthenticated)
+            {
+                return BadRequest(new { result.Message });
+            }
+
+            return Ok(new { result.Message });
         }
 
         [HttpGet("RefreshToken")]
@@ -63,7 +80,7 @@ namespace API.Controllers
             var result = await _authService.RefreshTokenAsync(refreshToken);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
             if (result.RefreshToken is not null)
             {
@@ -81,9 +98,9 @@ namespace API.Controllers
             var result = await _authService.ConfirmEmailAsync(email,token);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(new { Message = result.Massage });
+                return BadRequest(new { result.Message });
             }
-            return Ok(new { Message = result.Massage });
+            return Ok(new { result.Message });
         }
 
         private void SetRefreshTokenCookie(string refreshToken , DateTime Expires)
