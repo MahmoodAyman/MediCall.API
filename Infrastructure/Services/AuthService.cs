@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,7 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services;
 
-public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenService jwtTokenService, IMailingService mailingService) : IAuthService
+public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenService jwtTokenService, IMailingService mailingService) : IAuthService
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
@@ -28,7 +28,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
             authDTO.IsAuthenticated = false;
             authDTO.Message="Email or password is incorrect";
             return authDTO;
-        }       
+        }
 
         if(!await _userManager.IsEmailConfirmedAsync(user))
         {
@@ -42,7 +42,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         authDTO.UserName = user.UserName;
         authDTO.Token = await _jwtTokenService.GenerateAccessTokenAsync(user);
         authDTO.Roles = [.. (await _userManager.GetRolesAsync(user))];
-        
+
         if (user.RefreshTokens.Any(t => t.IsActive))
         {
             var activeRefreshToken = user.RefreshTokens.First(t => t.IsActive);
@@ -83,10 +83,10 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
 
         refreshToken.RevokedOn = DateTime.UtcNow;
         var newRefreshToken = await _jwtTokenService.GenerateRefreshTokenAsync();
-        
+
         user.RefreshTokens.Add(newRefreshToken);
         await _userManager.UpdateAsync(user);
-        
+
         authDTO.IsAuthenticated = true;
         authDTO.Email = user.Email;
         authDTO.UserName = user.UserName;
@@ -99,6 +99,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
     }
     public async Task<AuthDTO> PatientRegisterAsync(RegisterDTO registerDTO)
     {
+
         var validateErrors = await ValidateRegisterDTOAsync(registerDTO);
         if (validateErrors is not null && validateErrors.Count > 0)
         {
@@ -142,7 +143,6 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         {
             return FailResult(string.Join(", ", validateErrors));
         }
-
         var user = new Nurse
         {
             Id = registerDTO.NationalId,
@@ -185,7 +185,6 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         };
 
         var callbackUrl = QueryHelpers.AddQueryString("https://localhost:7116/api/Auth/ConfirmEmail", param);
-
         string emailBody = $@"
         <html>
             <body style=""font-family: Arial, sans-serif;"">

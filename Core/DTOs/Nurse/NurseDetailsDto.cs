@@ -10,7 +10,8 @@ namespace Core.DTOs.Nurse
 {
     public class NurseDetailsDto
     {
-        public int Id { get; set; }
+        [Required]
+        public required string Id { get; set; }
         [Required]
         [Display(Name = "First Name")]
         public required string FirstName { get; set; }
@@ -28,5 +29,7 @@ namespace Core.DTOs.Nurse
         public DateOnly? DateOfBirth { get; set; }
         [Display(Name = "Profile Picture")]
         public string? ProfilePicture { get; set; }
+
+        public int VisitCount { get; set; }
     }
 }

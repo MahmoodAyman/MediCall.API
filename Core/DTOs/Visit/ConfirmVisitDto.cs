@@ -1,16 +1,16 @@
 using System;
-using Core.Enums;
+using Core.Models;
 
-namespace Core.Models;
+namespace Core.DTOs.Visit;
 
-public class Visit : BaseEntity
+public class ConfirmVisitDto
 {
     public int Id { get; set; }
 
     public DateTime? ActualVisitDate { get; set; }
     public DateTime ScheduledDate { get; set; }
 
-    public VisitStatus Status { get; set; }
+    public Core.Enums.VisitStatus Status { get; set; }
     public string? Notes { get; set; }
     public string? CancellationReason { get; set; }
 
@@ -24,11 +24,10 @@ public class Visit : BaseEntity
 
     public required string NurseId { get; set; }
     public required string PatientId { get; set; }
-    public virtual List<Service> Services { get; set; } = [];
-    public virtual Nurse Nurse { get; set; } = null!;
-    public virtual Patient Patient { get; set; } = null!;
-    // public PaymentStatus PaymentStatus { get; set; }
+    public virtual List<Core.Models.Service> Services { get; set; } = [];
+    public virtual Core.Models.Nurse Nurse { get; set; } = null!;
+    public virtual Core.Models.Patient Patient { get; set; } = null!;
 
-    public virtual Payment Payment { get; set; } = null!;
+    public virtual Core.Models.Payment Payment { get; set; } = null!;
     public virtual Reviewing Reviewing { get; set; } = null!;
 }

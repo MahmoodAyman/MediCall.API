@@ -23,7 +23,7 @@ namespace Core.DTOs.Patient
         public string? ProfilePicture { get; set; }
         public string? Location { get; set; }
         public virtual List<PatientIllnesses> PatientIllnesses { get; set; }
-        public virtual List<Visit> Visits { get; set; }
+        public virtual List<string> Visits { get; set; }
     
 }
 }

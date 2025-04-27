@@ -1,4 +1,6 @@
 using System.Text;
+using System.Threading.Tasks;
+using API.SignalR;
 using Core.Interface;
 using Core.Models;
 using Infrastructure.Configurations;
@@ -14,7 +16,7 @@ namespace API
 {
     public class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             // Add services to the container.
@@ -26,7 +28,11 @@ namespace API
                 .AddDefaultTokenProviders();
 
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+                options.JsonSerializerOptions.WriteIndented = true;
+            });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -36,12 +42,14 @@ namespace API
             JwtSettings JwtOption = builder.Configuration.GetSection("JWT").Get<JwtSettings>() ?? throw new Exception("Error in JWT settings");
             MailSettings mailSettings = builder.Configuration.GetSection("MailSettings").Get<MailSettings>() ?? throw new Exception("Error in Mail settings");
 
+            builder.Services.AddSignalR();
             builder.Services.AddSingleton<JwtSettings>(JwtOption);
             builder.Services.AddSingleton<MailSettings>(mailSettings);
 
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IMailingService, MailingService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.AddScoped<IVisitService, VisitService>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 
@@ -81,6 +89,8 @@ namespace API
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<VisitHub>("/VisitHub");
+
 
             app.Run();
         }
