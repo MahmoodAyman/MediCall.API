@@ -2343,7 +2343,7 @@ textarea.form-control-lg {
 .form-select:disabled {
   background-color: var(--bs-secondary-bg);
 }
-.form-select:-moz-focusring {
+.form-select:-moz-focusering {
   color: transparent;
   text-shadow: 0 0 0 var(--bs-body-color);
 }

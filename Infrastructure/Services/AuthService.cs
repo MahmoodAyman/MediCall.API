@@ -97,54 +97,86 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
 
         return authDTO;
     }
-
-    public async Task<AuthDTO> RegisterAsync(RegisterDTO registerDTO)
-    {       
-        var validateErrors = ValidateRegisterDTO(registerDTO);
+    public async Task<AuthDTO> PatientRegisterAsync(RegisterDTO registerDTO)
+    {
+        var validateErrors = await ValidateRegisterDTOAsync(registerDTO);
         if (validateErrors is not null && validateErrors.Count > 0)
         {
             return FailResult(string.Join(", ", validateErrors));
         }
-        
-        if (await _userManager.FindByIdAsync(registerDTO.NationalId) is not null)
-        {
-            return FailResult("National ID already exists");
-        }
-        if (await _userManager.FindByEmailAsync(registerDTO.Email) is not null)
-        {
-            return FailResult("Email already exists");
-        }
-        if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerDTO.PhoneNumber))
-        {
-            return FailResult("Phone number already exists");
-        }
-        if (await _userManager.Users.AnyAsync(u => u.UserName == registerDTO.UserName))
-        {
-            return FailResult("User name already exists");
-        }
 
-
-        var user = new AppUser 
+        var user = new AppUser
         {
-            Id= registerDTO.NationalId,
-            Email= registerDTO.Email,
+            Id = registerDTO.NationalId,
+            Email = registerDTO.Email,
             UserName = registerDTO.UserName,
             PhoneNumber = registerDTO.PhoneNumber,
-            FirstName= registerDTO.FirstName,
-            LastName= registerDTO.LastName,
-            DateOfBirth= registerDTO.DateOfBirth,
-            Gender= registerDTO.Gender,
-            Location= registerDTO.Location
+            FirstName = registerDTO.FirstName,
+            LastName = registerDTO.LastName,
+            DateOfBirth = registerDTO.DateOfBirth,
+            Gender = registerDTO.Gender,
+            Location = registerDTO.Location
         };
 
-        var result = await _userManager.CreateAsync(user,registerDTO.Password);
+        var result = await _userManager.CreateAsync(user, registerDTO.Password);
         if (!result.Succeeded)
         {
-            return FailResult(string.Join(", ", result.Errors.Select(e => e.Description)));
+            FailResult(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        await _userManager.AddToRoleAsync(user,registerDTO.Role.ToString());
+        await _userManager.AddToRoleAsync(user, Role.Patient.ToString());
+        await SendConfirmationEmail(user);
 
+        var authDTO = new AuthDTO
+        {
+            IsAuthenticated = true,
+            Message = "Register Successfully. Check your inbox to confirm your mail"
+        };
+
+        return authDTO;
+    }
+    public async Task<AuthDTO> NurseRegisterAsync(NurseRegisterDTO registerDTO)
+    {
+        var validateErrors =await ValidateNurseRegisterDTOAsync(registerDTO);
+        if (validateErrors is not null && validateErrors.Count > 0)
+        {
+            return FailResult(string.Join(", ", validateErrors));
+        }
+
+        var user = new Nurse
+        {
+            Id = registerDTO.NationalId,
+            Email = registerDTO.Email,
+            UserName = registerDTO.UserName,
+            PhoneNumber = registerDTO.PhoneNumber,
+            FirstName = registerDTO.FirstName,
+            LastName = registerDTO.LastName,
+            DateOfBirth = registerDTO.DateOfBirth,
+            Gender = registerDTO.Gender,
+            Location = registerDTO.Location,
+            ExperienceYears = registerDTO.ExperienceYears,
+            LicenseNumber = registerDTO.LicenseNumber,
+        };
+
+        var result = await _userManager.CreateAsync(user, registerDTO.Password);
+        if (!result.Succeeded)
+        {
+            FailResult(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        await _userManager.AddToRoleAsync(user, Role.Nurse.ToString());
+        await SendConfirmationEmail(user);
+
+        var authDTO = new AuthDTO
+        {
+            IsAuthenticated = true,
+            Message = "Register Successfully. Check your inbox to confirm your mail"
+        };
+
+        return authDTO;
+    }
+    private async Task SendConfirmationEmail(AppUser user)
+    {
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var param = new Dictionary<string, string?>
         {
@@ -165,15 +197,6 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         </html>";
 
         await _mailingService.SendEmailAsync(user.Email, "Confirm your email", emailBody, null);
-
-        var authDTO = new AuthDTO
-        {
-            IsAuthenticated = true,
-            Message = "Register Successfully. Check your inbox to confirm your mail"
-        };
-
-        return authDTO ;
-
     }
     public async Task<AuthDTO> ConfirmEmailAsync(string email, string token)
     {
@@ -197,7 +220,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
         return authDTO;
     }
 
-    private static List<string> ValidateRegisterDTO(RegisterDTO dto)
+    private async Task<List<string>> ValidateRegisterDTOAsync(RegisterDTO dto)
     {
         var errors = new List<string>();
 
@@ -250,6 +273,7 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
             }
         }
 
+
         // === Email Validation ===
         if (string.IsNullOrWhiteSpace(dto.Email) ||
             !EmailRegex().IsMatch(dto.Email))
@@ -293,6 +317,41 @@ public partial class AuthService (UserManager<AppUser> userManager , IJwtTokenSe
             errors.Add("Location is required.");
         }
 
+        // === Unique Fields Validation ===
+        if (await _userManager.FindByIdAsync(dto.NationalId) is not null)
+        {
+            errors.Add("National ID already exists");
+        }
+        if (await _userManager.FindByEmailAsync(dto.Email) is not null)
+        {
+            errors.Add("Email already exists");
+        }
+        if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == dto.PhoneNumber))
+        {
+            errors.Add("Phone number already exists");
+        }
+        if (await _userManager.Users.AnyAsync(u => u.UserName == dto.UserName))
+        {
+            errors.Add("User name already exists");
+        }
+
+        return errors;
+    }
+    private async Task<List<string>> ValidateNurseRegisterDTOAsync(NurseRegisterDTO dto)
+    {
+        var errors = await ValidateRegisterDTOAsync(dto);
+        if (dto.ExperienceYears < 0)
+        {
+            errors.Add("Experience years must be a positive number.");
+        }
+        if (dto.ExperienceYears > int.Parse((DateTime.Now.Subtract(dto.DateOfBirth)).ToString(@"yyyy")))
+        {
+            errors.Add("Experience years must be less than age.");
+        }
+        if (string.IsNullOrWhiteSpace(dto.LicenseNumber))
+        {
+            errors.Add("License number is required.");
+        }
         return errors;
     }
 

@@ -34,15 +34,32 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterDTO registerDTO)
+        [HttpPost("PatientRegister")]
+        public async Task<IActionResult> PatientRegister(RegisterDTO registerDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _authService.RegisterAsync(registerDTO);
+            var result = await _authService.PatientRegisterAsync(registerDTO);
+
+            if (!result.IsAuthenticated)
+            {
+                return BadRequest(new { result.Message });
+            }
+
+            return Ok(new { result.Message });
+        }
+        [HttpPost("NurseRegister")]
+        public async Task<IActionResult> NurseRegister(NurseRegisterDTO registerDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authService.NurseRegisterAsync(registerDTO);
 
             if (!result.IsAuthenticated)
             {

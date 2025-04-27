@@ -21,7 +21,6 @@ namespace AdminDashboard
             builder.Services.AddDbContext<MediCallContext>(options =>
                 options.UseSqlServer(connectionString));
 
-
             builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<MediCallContext>();
             builder.Services.AddControllersWithViews();
@@ -49,6 +48,7 @@ namespace AdminDashboard
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();

@@ -26,9 +26,9 @@ namespace AdminDashboard.Areas.Identity.Pages.Account
 
         public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger, UserManager<AppUser> userManager)
         {
-            _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -114,8 +114,17 @@ namespace AdminDashboard.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var user = await _userManager.FindByEmailAsync(Input.Email);
-
+                var user =await _userManager.FindByEmailAsync(Input.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
+                if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    ModelState.AddModelError(string.Empty, "You are not allowed to login as an admin");
+                    return Page();
+                }
                 var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {

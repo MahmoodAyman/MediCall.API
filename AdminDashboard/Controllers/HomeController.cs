@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using AdminDashboard.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AdminDashboard.Controllers
