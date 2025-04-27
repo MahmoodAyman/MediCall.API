@@ -1,0 +1,116 @@
+﻿@using Core.Models
+@model IEnumerable<NurseCertificate>
+
+@{
+	ViewData["Title"] = "Nurse Certificate Verification";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+	<h1 class="mb-4 text-center">Nurse Certificate Verification</h1>
+	<div class="row justify-content-center">
+		<div class="col-12">
+			<div class="table-responsive">
+				<table class="table table-hover table-bordered align-middle text-center">
+					<thead class="table-dark">
+						<tr>
+							<th>National ID</th>
+							<th>Name</th>
+							<th>License Number</th>
+							<th>Certificate Name</th>
+							<th>Required?</th>
+							<th>Verification</th>
+							<th>Certificate Image</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var certificate in Model)
+						{
+							<tr>
+								<td>@certificate.Nurse.Id</td>
+								<td>@($"{certificate.Nurse.FirstName} {certificate.Nurse.LastName}")</td>
+								<td>@certificate.Nurse.LicenseNumber</td>
+								<td>@certificate.Certificate.Name</td>
+								<td>
+									<span class="badge @(certificate.Certificate.IsRequired ? "bg-success" : "bg-secondary")">
+										@(certificate.Certificate.IsRequired ? "Yes" : "No")
+									</span>
+								</td>
+								<td>
+									<span class="badge @(certificate.IsVerified ? "bg-success" : "bg-warning text-dark")">
+										@(certificate.IsVerified ? "Verified" : "Pending")
+									</span>
+								</td>
+								<td>
+									<img src="@certificate.FilePath" alt="Certificate Image" class="img-thumbnail zoomable-img" style="max-width: 100px; height: auto; cursor: pointer;" />
+								</td>
+								<td>
+									<a href="@Url.Action("Verify", "VerifieNurseCertificate", new { NurseId = certificate.NurseId, CertificateId = certificate.CertificateId })" class="btn btn-sm btn-primary">
+										Verify
+									</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Popup Modal -->
+<div id="imgModal" class="img-modal" onclick="closeModal()">
+	<span class="close">&times;</span>
+	<img class="img-modal-content" id="modalImage">
+</div>
+
+@section Scripts {
+	<script>
+		// When any image with class 'zoomable-img' is clicked
+		document.querySelectorAll('.zoomable-img').forEach(img => {
+			img.addEventListener('click', function () {
+				document.getElementById('imgModal').style.display = "block";
+				document.getElementById('modalImage').src = this.src;
+			});
+		});
+
+		// Close the modal when clicking anywhere
+		function closeModal() {
+			document.getElementById('imgModal').style.display = "none";
+		}
+	</script>
+
+	<style>
+		.img-modal {
+			display: none;
+			position: fixed;
+			z-index: 1050;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgba(0,0,0,0.8);
+		}
+
+		.img-modal-content {
+			display: block;
+			margin: 5% auto;
+			max-width: 80%;
+			height: auto;
+			border-radius: 10px;
+			box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+		}
+
+		.close {
+			position: absolute;
+			top: 20px;
+			right: 35px;
+			color: #fff;
+			font-size: 40px;
+			font-weight: bold;
+			cursor: pointer;
+		}
+	</style>
+}

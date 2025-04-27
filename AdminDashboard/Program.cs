@@ -2,6 +2,7 @@ using Core.Interface;
 using Core.Models;
 using Infrastructure.Configurations;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -23,6 +24,14 @@ namespace AdminDashboard
 
             builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<MediCallContext>();
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+            });
+
+
+
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 
@@ -30,6 +39,7 @@ namespace AdminDashboard
             builder.Services.AddSingleton<MailSettings>(mailSettings);
 
             builder.Services.AddScoped<IEmailSender, MailingService>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             var app = builder.Build();
 
