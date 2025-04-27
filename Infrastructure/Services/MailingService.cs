@@ -9,10 +9,11 @@ using Microsoft.AspNetCore.Http;
 using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace Infrastructure.Services
 {
-    public class MailingService(MailSettings mailSettings) : IMailingService
+    public class MailingService(MailSettings mailSettings) : IMailingService , IEmailSender
     {
         private readonly MailSettings _mailSettings = mailSettings;
         public async Task SendEmailAsync(string mailTo, string subject, string body, IList<IFormFile>? attachments)
@@ -51,6 +52,11 @@ namespace Infrastructure.Services
             await smtp.SendAsync(email);
 
             smtp.Disconnect(true);
+        }
+
+        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            await SendEmailAsync(email, subject, htmlMessage, null);
         }
     }
 }

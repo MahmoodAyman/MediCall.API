@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{B1772D79-2E5F-4FE4-903E-01E96D9E350A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminDashboard", "AdminDashboard\AdminDashboard.csproj", "{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,8 +57,23 @@ Global
 		{B1772D79-2E5F-4FE4-903E-01E96D9E350A}.Release|x64.Build.0 = Release|Any CPU
 		{B1772D79-2E5F-4FE4-903E-01E96D9E350A}.Release|x86.ActiveCfg = Release|Any CPU
 		{B1772D79-2E5F-4FE4-903E-01E96D9E350A}.Release|x86.Build.0 = Release|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Debug|x64.Build.0 = Debug|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Debug|x86.Build.0 = Debug|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Release|x64.ActiveCfg = Release|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Release|x64.Build.0 = Release|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Release|x86.ActiveCfg = Release|Any CPU
+		{CD23DF69-9EA0-4ED6-98C7-59C758F8DFC7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {91655D29-F31D-4DAE-AFA2-2D3A7B48A02C}
 	EndGlobalSection
 EndGlobal
