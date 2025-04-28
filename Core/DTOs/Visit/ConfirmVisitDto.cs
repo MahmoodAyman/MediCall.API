@@ -29,5 +29,5 @@ public class ConfirmVisitDto
     public virtual Core.Models.Patient Patient { get; set; } = null!;
 
     public virtual Core.Models.Payment Payment { get; set; } = null!;
-    public virtual Reviewing Reviewing { get; set; } = null!;
+    public virtual ReviewingDTO Reviewing { get; set; } = null!;
 }
