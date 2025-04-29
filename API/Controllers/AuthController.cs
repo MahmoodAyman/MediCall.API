@@ -35,7 +35,8 @@ namespace API.Controllers
         }
 
         [HttpPost("PatientRegister")]
-        public async Task<IActionResult> PatientRegister(RegisterDTO registerDTO)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> PatientRegister([FromForm] RegisterDTO registerDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -52,7 +53,8 @@ namespace API.Controllers
             return Ok(new { result.Message });
         }
         [HttpPost("NurseRegister")]
-        public async Task<IActionResult> NurseRegister(NurseRegisterDTO registerDTO)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> NurseRegister([FromForm] NurseRegisterDTO registerDTO)
         {
             if (!ModelState.IsValid)
             {
