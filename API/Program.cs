@@ -16,7 +16,7 @@ namespace API
 {
     public class Program
     {
-        private static async Task Main(string[] args)
+        private static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             // Add services to the container.

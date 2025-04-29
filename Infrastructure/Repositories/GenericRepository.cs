@@ -34,6 +34,18 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, IDele
         return entity;
     }
 
+    public async Task<T?> GetByIdAsync(object id1 , object id2)
+    {
+        var entity = await _dbSet.FindAsync(id1,id2);
+
+        if (entity is not null && entity.IsDeleted)
+        {
+            entity = null;
+        }
+
+        return entity;
+    }
+
     public async Task<IReadOnlyList<T>> GetAllAsync()
     {
         return await _dbSet.Where(e => e.IsDeleted==false).AsNoTracking().ToListAsync();

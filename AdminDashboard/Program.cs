@@ -20,7 +20,7 @@ namespace AdminDashboard
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<MediCallContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseSqlServer(connectionString).UseLazyLoadingProxies());
 
             builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<MediCallContext>();
@@ -29,8 +29,6 @@ namespace AdminDashboard
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
-
-
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
@@ -51,7 +49,6 @@ namespace AdminDashboard
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

@@ -28,7 +28,7 @@ public class VerifieNurseCertificateController : Controller
 
     public async Task<IActionResult> Verify(string NurseId, int CertificateId)
     {
-        var nurseCertificate = await _nurseCertificateRepository.GetByIdAsync(new { NurseId, CertificateId });
+        var nurseCertificate = await _nurseCertificateRepository.GetByIdAsync( NurseId, CertificateId );
         if (nurseCertificate == null)
         {
             return NotFound();
