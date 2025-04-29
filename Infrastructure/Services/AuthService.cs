@@ -6,6 +6,7 @@ using Core.DTOs;
 using Core.Enums;
 using Core.Interface;
 using Core.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services;
 
-public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenService jwtTokenService, IMailingService mailingService) : IAuthService
+public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenService jwtTokenService, IMailingService mailingService, IUploadFileService uploadFile, IGenericRepository<Certificate> certificateRepository) : IAuthService
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
     private readonly IMailingService _mailingService = mailingService;
+    private readonly IUploadFileService _uploadFileService = uploadFile;
+    private readonly IGenericRepository<Certificate> _certificateRepository = certificateRepository;
     public async Task<AuthDTO> LoginAsync(LoginDTO loginDTO)
     {
         var authDTO = new AuthDTO();
@@ -105,6 +108,11 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
         {
             return FailResult(string.Join(", ", validateErrors));
         }
+        string? imagePath =null;
+        if (registerDTO.Image is not null)
+        {
+           imagePath = await _uploadFileService.UploadFile(registerDTO.Image);
+        }
 
         var user = new AppUser
         {
@@ -116,7 +124,9 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
             LastName = registerDTO.LastName,
             DateOfBirth = registerDTO.DateOfBirth,
             Gender = registerDTO.Gender,
-            Location = registerDTO.Location
+            Location = registerDTO.Location,
+            ProfilePicture = imagePath
+
         };
 
         var result = await _userManager.CreateAsync(user, registerDTO.Password);
@@ -143,6 +153,27 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
         {
             return FailResult(string.Join(", ", validateErrors));
         }
+
+        string? imagePath = null;
+        if (registerDTO.Image is not null)
+        {
+            imagePath = await _uploadFileService.UploadFile(registerDTO.Image);
+        }
+
+        var nurseCertificates = new List<NurseCertificate>();
+        foreach (var certificateDTO in registerDTO.NurseCertificates)
+        {
+
+            var nurseCertificate = new NurseCertificate
+            {
+                NurseId = registerDTO.NationalId,
+                CertificateId = certificateDTO.CertificateId,
+                FilePath = await _uploadFileService.UploadFile(certificateDTO.File),
+                ExpirationDate = certificateDTO.ExpirationDate
+            };
+            nurseCertificates.Add(nurseCertificate);
+        }
+
         var user = new Nurse
         {
             Id = registerDTO.NationalId,
@@ -156,6 +187,8 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
             Location = registerDTO.Location,
             ExperienceYears = registerDTO.ExperienceYears,
             LicenseNumber = registerDTO.LicenseNumber,
+            ProfilePicture = imagePath,
+            Certificates = nurseCertificates
         };
 
         var result = await _userManager.CreateAsync(user, registerDTO.Password);
@@ -193,9 +226,9 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
                 <a href=""{callbackUrl}"" style=""padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;"">Confirm Email</a>
                 <p>If you did not request this, please ignore this email.</p>
             </body>
-        </html>";
+        </html>";   
 
-        await _mailingService.SendEmailAsync(user.Email, "Confirm your email", emailBody, null);
+        await _mailingService.SendEmailAsync(user.Email??throw new NullReferenceException("Eail is null here"), "Confirm your email", emailBody, null);
     }
     public async Task<AuthDTO> ConfirmEmailAsync(string email, string token)
     {
@@ -316,6 +349,28 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
             errors.Add("Location is required.");
         }
 
+        // === image validation ===
+        if (dto.Image is not null)
+        {
+            if (!IsFileValid(dto.Image))
+            {
+                errors.Add("Image is not valid. Allowed formats: jpg, jpeg, png. Max size: 2MB.");
+            }
+        }
+
+        // === Date of Birth Validation ===
+        if (dto.DateOfBirth == default)
+        {
+            errors.Add("Date of birth is required.");
+        }
+        else if (dto.DateOfBirth > DateTime.Now.AddYears(-18))
+        {
+            errors.Add("You must be at least 18 years old to register.");
+        }
+        else if (dto.DateOfBirth < DateTime.Now.AddYears(-120))
+        {
+            errors.Add("Date of birth is not valid.");
+        }
         // === Unique Fields Validation ===
         if (await _userManager.FindByIdAsync(dto.NationalId) is not null)
         {
@@ -343,7 +398,7 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
         {
             errors.Add("Experience years must be a positive number.");
         }
-        if (dto.ExperienceYears > int.Parse((DateTime.Now.Subtract(dto.DateOfBirth)).ToString(@"yyyy")))
+        if (dto.ExperienceYears > DateTime.Now.Year - dto.DateOfBirth.Year)
         {
             errors.Add("Experience years must be less than age.");
         }
@@ -351,7 +406,53 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
         {
             errors.Add("License number is required.");
         }
+
+        if (dto.NurseCertificates is null || dto.NurseCertificates.Count == 0)
+        {
+            errors.Add("At least one certificate is required.");
+        }
+        else
+        {
+            foreach (var certificate in dto.NurseCertificates)
+            {
+                errors.AddRange(await NurseCertificateValidationAsync(certificate));
+            }
+        }
         return errors;
+    }
+    private async Task<List<string>> NurseCertificateValidationAsync(NurseCertificateDTO dto)
+    {
+        var errors = new List<string>();
+        var cert = await _certificateRepository.GetByIdAsync(dto.CertificateId);
+        if (cert is null)
+        {
+            errors.Add($"Certificate with ID {dto.CertificateId} does not exist.");
+            return errors;
+        }
+        if (!IsFileValid(dto.File))
+        {
+            errors.Add($"Certificate file for {cert.Name} is not valid. Allowed formats: jpg, jpeg, png. Max size: 2MB.");
+        }
+        if(cert.IsExpirable && dto.ExpirationDate == default)
+        {
+            errors.Add($"Expiration date is required for {cert.Name}.");
+        }
+        return errors;
+    }
+    private static bool IsFileValid(IFormFile file)
+    {
+        if (file is null) return true;
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+        var fileExtension = Path.GetExtension(file.FileName);
+        if (!allowedExtensions.Contains(fileExtension))
+        {
+            return false;
+        }
+        if (file.Length > 2 * 1024 * 1024)
+        {
+            return false;
+        }
+        return true;
     }
 
     private static AuthDTO FailResult(string message)

@@ -18,6 +18,10 @@ namespace Infrastructure.Data.Configurations
                 .IsFixedLength(true)
                 .IsUnicode(false);
 
+            builder.Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(256);
+
             builder.ToTable(tb =>
             {
                 tb.HasCheckConstraint("CK_AppUser_Id_EgyptianID", "Id LIKE '[2,3]%' AND LEN(Id) = 14");

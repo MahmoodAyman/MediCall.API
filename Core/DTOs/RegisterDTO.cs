@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Enums;
 using Core.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Core.DTOs
 {
     public class RegisterDTO
     {
+
         public required string NationalId { get; set; }
         public required string Email { get; set; }
         public required string UserName { get; set; }
@@ -22,5 +24,6 @@ namespace Core.DTOs
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
         public required Location Location { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }
