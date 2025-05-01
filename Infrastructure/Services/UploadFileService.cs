@@ -24,6 +24,7 @@ namespace Infrastructure.Services
                 Directory.CreateDirectory(uploadsFolder);
             }
 
+
             var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 

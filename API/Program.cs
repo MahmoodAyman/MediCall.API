@@ -58,6 +58,7 @@ namespace API
 
             builder.Services.AddScoped<IMailingService, MailingService>();
             builder.Services.AddScoped<IUploadFileService, UploadFileService>();
+            builder.Services.AddScoped<INurseCertificateService, NurseCertificateService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
