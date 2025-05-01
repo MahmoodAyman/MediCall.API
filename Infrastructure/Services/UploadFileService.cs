@@ -13,11 +13,12 @@ namespace Infrastructure.Services
         public async Task<string> UploadFile(IFormFile file)
         {
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
-
+            
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
             }
+
 
             var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -26,6 +27,7 @@ namespace Infrastructure.Services
             {
                 await file.CopyToAsync(stream);
             }
+            
             return filePath;
         }
     }
