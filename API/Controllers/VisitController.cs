@@ -1,7 +1,9 @@
-using API.SignalR;
+using Infrastructure.SignalR;
 using Core.DTOs.Visit;
+using Core.Enums;
 using Core.Interface;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -18,36 +20,35 @@ namespace API.Controllers
         {
             _visitService = visitService;
         }
+        [Authorize(Roles = "Patient")]
         [HttpPost("find-nurse")]
-        public async Task<IActionResult> FindNearestNurses(CreateVisitDto visit)
+        public async Task<IActionResult> FindNearestNurses(RequestNearNursesDTO requestNeerNursesDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (string.IsNullOrEmpty(visit.PatientId))
+            var responseNeerNursesDTO = await _visitService.GetNearNurses(requestNeerNursesDTO);
+            if(!responseNeerNursesDTO.Success)
             {
-                return BadRequest("Visit Id not provided");
-            }
-            var nurses = await _visitService.GetNearNurses(visit);
-            var createPendingVsist = _visitService.CreatePendingVisitAsync(visit);
-
-            var hubContext = HttpContext.RequestServices.GetRequiredService<IHubContext<VisitHub>>();
-
-            foreach (var nurse in nurses)
-            {
-                await hubContext.Clients.User(nurse.Id).SendAsync("New Visit Request", createPendingVsist, visit);
+                return BadRequest(responseNeerNursesDTO.Message);
             }
 
-            return Ok(nurses);
+            return Ok(new {responseNeerNursesDTO.Nurses});
         }
 
-        [HttpPost("accept-visit")]
-        public async Task<IActionResult> AcceptVisit(int visitId, string nurseId)
+        [Authorize(Roles = "Nurse")]
+        [HttpPost("accept-visit-by-nurse")]
+        public async Task<IActionResult> AcceptVisit(int visitId)
         {
+            var nurseId = User.FindFirst("uid")?.Value;
             if (string.IsNullOrWhiteSpace(nurseId))
             {
                 return BadRequest("No Nurse ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
             }
             var result = await _visitService.AcceptVisitByNurse(visitId, nurseId);
             if (!result.Success)
@@ -56,5 +57,90 @@ namespace API.Controllers
             }
             return Ok(result);
         }
+
+        [Authorize(Roles = "Patient")]
+        [HttpPost("accept-nurse-by-patient")]
+        public async Task<IActionResult> AcceptNurse(int visitId, string nurseId)
+        {
+            var patientId = User.FindFirst("uid")?.Value;
+            if (string.IsNullOrWhiteSpace(nurseId))
+            {
+                return BadRequest("No Nurse ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
+            }
+            var result = await _visitService.AcceptNurseByPatient(visitId, nurseId,patientId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Patient")]
+        [HttpPost("cancel-visit-by-patient")]
+        public async Task<IActionResult> CancelVisitByPatient(int visitId, string canclationReson)
+        {
+            var patientId = User.FindFirst("uid")?.Value;
+            if (string.IsNullOrWhiteSpace(patientId))
+            {
+                return BadRequest("No Patient ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
+            }
+            var result = await _visitService.CancelVisitByPatient(visitId, patientId, canclationReson);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Nurse")]
+        [HttpPost("cancel-visit-by-nurse")]
+        public async Task<IActionResult> CancelVisitByNurse(int visitId, string canclationReson)
+        {
+            var nurseId = User.FindFirst("uid")?.Value;
+            if (string.IsNullOrWhiteSpace(nurseId))
+            {
+                return BadRequest("No Nurse ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
+            }
+            var result = await _visitService.CancelVisitByNurse(visitId, nurseId, canclationReson);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Patient")]
+        [HttpPost("complete-visit-by-patient")]
+        public async Task<IActionResult> CompleteVisitByPatient(int visitId)
+        {
+            var patientId = User.FindFirst("uid")?.Value;
+            if (string.IsNullOrWhiteSpace(patientId))
+            {
+                return BadRequest("No Patient ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
+            }
+            var result = await _visitService.CompleteVisitByPatient(visitId, patientId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
     }
 }

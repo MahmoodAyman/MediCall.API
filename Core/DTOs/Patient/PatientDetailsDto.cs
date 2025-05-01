@@ -9,7 +9,7 @@ namespace Core.DTOs.Patient
 {
     public class PatientDetailsDto
     {
-        public int Id { get; set; }
+        public required string Id { get; set; }
         [Required]
         [Display(Name = "First Name")]
         public required string FirstName { get; set; }
@@ -21,9 +21,9 @@ namespace Core.DTOs.Patient
         public DateOnly? DateOfBirth { get; set; }
         [Display(Name = "Profile Picture")]
         public string? ProfilePicture { get; set; }
-        public string? Location { get; set; }
-        public virtual List<PatientIllnesses> PatientIllnesses { get; set; }
-        public virtual List<string> Visits { get; set; }
-    
-}
+        public Location? Location { get; set; }
+        public virtual List<PatientIllnesses> PatientIllnesses { get; set; } = [];
+        public virtual List<string>? Visits { get; set; }
+        public string? PhoneNumber { get; set; }
+    }
 }

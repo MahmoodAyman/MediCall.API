@@ -9,7 +9,6 @@ public class Visit : BaseEntity
 
     public DateTime? ActualVisitDate { get; set; }
     public DateTime ScheduledDate { get; set; }
-
     public VisitStatus Status { get; set; }
     public string? Notes { get; set; }
     public string? CancellationReason { get; set; }
@@ -20,15 +19,13 @@ public class Visit : BaseEntity
     public decimal CalculateTotalCost() => Services?.Sum(s => s.BasePrice) ?? 0 + TransportationCost;
 
     public required Location PatientLocation { get; set; }
-    public required Location NurseLocation { get; set; }
+    public Location? NurseLocation { get; set; }
 
-    public required string NurseId { get; set; }
+    public string? NurseId { get; set; }
     public required string PatientId { get; set; }
     public virtual List<Service> Services { get; set; } = [];
-    public virtual Nurse Nurse { get; set; } = null!;
+    public virtual Nurse? Nurse { get; set; }
     public virtual Patient Patient { get; set; } = null!;
-    // public PaymentStatus PaymentStatus { get; set; }
-
     public virtual Payment Payment { get; set; } = null!;
-    public virtual Reviewing Reviewing { get; set; } = null!;
+    public virtual Reviewing? Reviewing { get; set; }
 }

@@ -1,12 +1,12 @@
 using System.Text;
 using System.Threading.Tasks;
-using API.SignalR;
 using Core.Interface;
 using Core.Models;
 using Infrastructure.Configurations;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Infrastructure.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +49,13 @@ namespace API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IVisitService, VisitService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
+            builder.Services.AddScoped<IGetDataService, GetDataService>();
+            builder.Services.AddScoped<IPatientIllnessesService, PatientIllnessesService>();
+            //builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<INotificationService,NotificationService>();
+
+
+
             builder.Services.AddScoped<IMailingService, MailingService>();
             builder.Services.AddScoped<IUploadFileService, UploadFileService>();
             builder.Services.AddScoped<INurseCertificateService, NurseCertificateService>();
@@ -77,6 +84,15 @@ namespace API
                 };
             });
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -93,9 +109,12 @@ namespace API
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers();
-            app.MapHub<VisitHub>("/VisitHub");
+            app.UseCors("AllowAll");
 
+            app.MapControllers();
+
+            app.MapHub<VisitHub>("/VisitHub");
+            app.MapHub<NotificationHub>("/hub/notifications");
 
             app.Run();
         }
