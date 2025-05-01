@@ -22,6 +22,6 @@ namespace Core.DTOs.Patient
         [Display(Name = "Profile Picture")]
         public string? ProfilePicture { get; set; }
         public Location? Location { get; set; }
-        public virtual List<PatientIllnesses> PatientIllnesses { get; set; }
+        public virtual List<PatientIllnesses> PatientIllnesses { get; set; } = [];
     }
 }

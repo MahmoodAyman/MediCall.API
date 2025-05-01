@@ -6,5 +6,6 @@ public enum NotificationType
     Chat,
     Payment,
     Advertisment,
-    System
+    System,
+    Visit
 }

@@ -5,7 +5,7 @@ namespace Core.Enums;
 public enum VisitStatus
 {
     Pending,
-    Confirmed,
+    Accepted,
     Done,
     PendingInquiry,
     PaymentPending,

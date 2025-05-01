@@ -101,7 +101,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, IDele
     public async Task<bool> IsIdValidTypeAsync<Type>(object id) where Type : class
     {
         var entity = await _dbContext.Set<Type>().FindAsync(id);
-        return entity == null ? throw new InvalidOperationException($"This {typeof(Type).Name} is not existed") : true;
+        return entity != null ;
     }
 
     public async Task<bool> SaveAllAsync()

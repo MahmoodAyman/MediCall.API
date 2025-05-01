@@ -7,9 +7,10 @@ namespace Core.Interface;
 
 public interface IVisitService
 {
-    public Task<IReadOnlyList<NurseDetailsDto>> GetNearNurses(CreateVisitDto visit);
-    public Task<string> CreatePendingVisitAsync(CreateVisitDto visitDto);
+    Task<ResponseNearNursesDTO> GetNearNurses(RequestNearNursesDTO requestNeerNurses);
+    Task<int> CreatePendingVisitAsync(RequestNearNursesDTO visitDto);
 
-    public Task<(bool Success, string Message, Visit visit, NurseDetailsDto NurseDetails)> AcceptVisitByNurse(int visitId, string nurseId);
+    Task<ResponseNearNursesDTO> AcceptVisitByNurse(int visitId, string nurseId);
+    Task<ResponseNearNursesDTO> AcceptNurseByPatient(int visitId, string nurseId);
 
 }

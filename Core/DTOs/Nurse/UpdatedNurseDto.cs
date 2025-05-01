@@ -22,7 +22,7 @@ namespace Core.DTOs.Nurse
         public bool IsAvailable { get; set; }
         [Display(Name = "Is Verified?")]
         public bool IsVerified { get; set; }
-        public virtual List<NurseCertificate> Certificates { get; set; }
+        public virtual List<NurseCertificate> Certificates { get; set; } = [];
         [Display(Name = "Date Of Birth")]
         [DataType(DataType.Date)]
         public DateOnly? DateOfBirth { get; set; }

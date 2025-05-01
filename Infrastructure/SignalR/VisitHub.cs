@@ -2,7 +2,7 @@ using System;
 using Core.DTOs.Visit;
 using Microsoft.AspNetCore.SignalR;
 
-namespace API.SignalR;
+namespace Infrastructure.SignalR;
 
 public class VisitHub : Hub
 {
@@ -14,4 +14,9 @@ public class VisitHub : Hub
     {
         await Clients.User(paytientId).SendAsync("Nurse Accepted", visitDetails);
     }
+}
+
+public class NotificationHub : Hub
+{
+   
 }

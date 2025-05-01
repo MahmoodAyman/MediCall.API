@@ -7,6 +7,7 @@ using Infrastructure.Configurations;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Infrastructure.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -76,6 +77,15 @@ namespace API
                 };
             });
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -92,9 +102,12 @@ namespace API
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers();
-            app.MapHub<VisitHub>("/VisitHub");
+            app.UseCors("AllowAll");
 
+            app.MapControllers();
+
+            app.MapHub<VisitHub>("/VisitHub");
+            app.MapHub<NotificationHub>("/hub/notifications");
 
             app.Run();
         }
