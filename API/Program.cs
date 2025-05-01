@@ -1,6 +1,5 @@
 using System.Text;
 using System.Threading.Tasks;
-using API.SignalR;
 using Core.Interface;
 using Core.Models;
 using Infrastructure.Configurations;
@@ -50,6 +49,13 @@ namespace API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IVisitService, VisitService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
+            builder.Services.AddScoped<IGetDataService, GetDataService>();
+            builder.Services.AddScoped<IPatientIllnessesService, PatientIllnessesService>();
+            //builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<INotificationService,NotificationService>();
+
+
+
             builder.Services.AddScoped<IMailingService, MailingService>();
             builder.Services.AddScoped<IUploadFileService, UploadFileService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();

@@ -6,6 +6,7 @@ public enum VisitStatus
 {
     Pending,
     Accepted,
+    Confirmed,
     Done,
     PendingInquiry,
     PaymentPending,

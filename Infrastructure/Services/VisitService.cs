@@ -267,6 +267,12 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
         _visitRepository.Update(visit);
         await _visitRepository.SaveAllAsync();
 
+
+        nurse.IsAvailable = false;
+        _nurseRepository.Update(nurse);
+        await _nurseRepository.SaveAllAsync();
+
+
         await _notificationService.SendNotificationAsync(nurseId, "Visit accepted", "You have accepted a visit", visit);
 
         response.Success = true;
@@ -320,5 +326,133 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
             }
         }
         return errors;
+    }
+
+    public async Task<ResponseNearNursesDTO> CancelVisitByPatient(int visitId, string patientId, string canclationReson)
+    {
+        var response = new ResponseNearNursesDTO();
+        var visit = await _visitRepository.GetByIdAsync(visitId);
+        var patient = await _patientRepository.GetByIdAsync(patientId);
+        var errors = ValidCancelVisit(visit, patient);
+        if (errors != null && errors.Count > 0)
+        {
+            response.Success = false;
+            response.Message = string.Join(" , ", errors);
+
+            return response;
+        }
+        visit.Status = VisitStatus.Canceled;
+        visit.CancellationReason = canclationReson;
+        _visitRepository.Update(visit);
+        await _visitRepository.SaveAllAsync();
+
+        var nurse = await _nurseRepository.GetByIdAsync(visit.NurseId) ?? throw new Exception("Nurse not found");
+        nurse.IsAvailable = false;
+        _nurseRepository.Update(nurse);
+        await _nurseRepository.SaveAllAsync();
+
+        await _notificationService.SendNotificationAsync(visit.NurseId, "Visit canceled", "The patient has canceled the visit", visit);
+        response.Success = true;
+        response.Message = "Visit canceled successfully";
+        return response;
+    }
+
+    public async Task<ResponseNearNursesDTO> CancelVisitByNurse(int visitId, string nurseId, string canclationReson)
+    {
+        var response = new ResponseNearNursesDTO();
+        var visit = await _visitRepository.GetByIdAsync(visitId);
+        var nurse = await _nurseRepository.GetByIdAsync(nurseId);
+        var errors = ValidCancelVisit(visit, nurse);
+        if (errors != null && errors.Count > 0)
+        {
+            response.Success = false;
+            response.Message = string.Join(" , ", errors);
+
+            return response;
+        }
+        visit.Status = VisitStatus.Canceled;
+        visit.CancellationReason = canclationReson;
+        _visitRepository.Update(visit);
+        await _visitRepository.SaveAllAsync();
+
+        nurse.IsAvailable = true;
+        _nurseRepository.Update(nurse);
+        await _nurseRepository.SaveAllAsync();
+
+        await _notificationService.SendNotificationAsync(visit.PatientId, "Visit canceled", "The nurse has canceled the visit", visit);
+        response.Success = true;
+        response.Message = "Visit canceled successfully";
+        return response;
+    }
+    private List<string> ValidCancelVisit(Visit? visit, AppUser? patient)
+    {
+        var errors = new List<string>();
+        if (patient is null)
+        {
+            errors.Add("Patient not found");
+        }
+        if (visit is null)
+        {
+            errors.Add("Visit not found");
+        }
+        else
+        {
+            if (visit.Status == VisitStatus.Done)
+            {
+                errors.Add("Visit is Done you can not cancl it");
+            }
+            else if(visit.Status == VisitStatus.Canceled)
+            {
+                errors.Add("Visit is already cancelled you can not cancl it again");
+            }
+        }
+        return errors;
+    }
+
+    public async Task<ResponseNearNursesDTO> CompleteVisitByPatient(int visitId, string patientId)
+    {
+        var response = new ResponseNearNursesDTO();
+        var visit = await _visitRepository.GetByIdAsync(visitId);
+        var patient = await _nurseRepository.GetByIdAsync(visitId);
+        var errors = ValidCancelVisit(visit, patient);
+        if (errors != null && errors.Count > 0)
+        {
+            response.Success = false;
+            response.Message = string.Join(" , ", errors);
+
+            return response;
+        }
+        visit.Status = VisitStatus.Done;
+        visit.ActualVisitDate = DateTime.UtcNow;
+        _visitRepository.Update(visit);
+        await _visitRepository.SaveAllAsync();
+
+        var nurse = await _nurseRepository.GetByIdAsync(visit.NurseId) ?? throw new Exception("Nurse not found");
+
+        nurse.VisitCount++;
+        nurse.IsAvailable = true;
+
+        _nurseRepository.Update(nurse);
+        await _nurseRepository.SaveAllAsync();
+
+        await _notificationService.SendNotificationAsync(visit.NurseId, "Visit completed", "The patient has completed the visit", visit);
+
+        response.Success = true;
+        response.Message = "Visit completed successfully";
+        response.Vist = ToVisitDto(visit);
+        response.Nurses = new List<NurseDetailsDto>
+        {
+            new NurseDetailsDto
+            {
+                Id = nurse.Id,
+                FirstName = nurse.FirstName,
+                LastName = nurse.LastName,
+                PhoneNumber = nurse.PhoneNumber,
+                ProfilePicture = nurse.ProfilePicture,
+                ExperienceYears = nurse.ExperienceYears,
+                VisitCount = nurse.VisitCount
+            }
+        };
+        return response;
     }
 }

@@ -1,4 +1,4 @@
-using API.SignalR;
+using Infrastructure.SignalR;
 using Core.DTOs.Visit;
 using Core.Enums;
 using Core.Interface;
@@ -76,5 +76,66 @@ namespace API.Controllers
             }
             return Ok(result);
         }
+
+        [Authorize(Roles = "Patient")]
+        [HttpPost("cancel-visit-by-patient")]
+        public async Task<IActionResult> CancelVisitByPatient(int visitId, string patientId, string canclationReson)
+        {
+            if (string.IsNullOrWhiteSpace(patientId))
+            {
+                return BadRequest("No Patient ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
+            }
+            var result = await _visitService.CancelVisitByPatient(visitId, patientId, canclationReson);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Nurse")]
+        [HttpPost("cancel-visit-by-nurse")]
+        public async Task<IActionResult> CancelVisitByNurse(int visitId, string nurseId, string canclationReson)
+        {
+            if (string.IsNullOrWhiteSpace(nurseId))
+            {
+                return BadRequest("No Nurse ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
+            }
+            var result = await _visitService.CancelVisitByNurse(visitId, nurseId, canclationReson);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Patient")]
+        [HttpPost("complete-visit-by-patient")]
+        public async Task<IActionResult> CompleteVisitByPatient(int visitId, string patientId)
+        {
+            if (string.IsNullOrWhiteSpace(patientId))
+            {
+                return BadRequest("No Patient ID provided");
+            }
+            if (visitId <= 0)
+            {
+                return BadRequest("No Visit ID provided");
+            }
+            var result = await _visitService.CompleteVisitByPatient(visitId, patientId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
     }
 }

@@ -12,5 +12,8 @@ public interface IVisitService
 
     Task<ResponseNearNursesDTO> AcceptVisitByNurse(int visitId, string nurseId);
     Task<ResponseNearNursesDTO> AcceptNurseByPatient(int visitId, string nurseId);
+    Task<ResponseNearNursesDTO> CancelVisitByPatient(int visitId, string patientId, string canclationReson);
+    Task<ResponseNearNursesDTO> CancelVisitByNurse(int visitId, string nurseId, string canclationReson);
+    Task<ResponseNearNursesDTO> CompleteVisitByPatient(int visitId, string patientId);
 
 }
