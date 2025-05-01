@@ -14,13 +14,22 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services;
 
-public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenService jwtTokenService, IMailingService mailingService, IUploadFileService uploadFile, IGenericRepository<Certificate> certificateRepository) : IAuthService
+public partial class AuthService(
+    UserManager<AppUser> userManager,
+    IJwtTokenService jwtTokenService, 
+    IMailingService mailingService, 
+    IUploadFileService uploadFile,
+    IHttpContextAccessor httpContextAccessor,
+    IGenericRepository<Certificate> certificateRepository
+    ) : IAuthService
+
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
     private readonly IMailingService _mailingService = mailingService;
     private readonly IUploadFileService _uploadFileService = uploadFile;
     private readonly IGenericRepository<Certificate> _certificateRepository = certificateRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     public async Task<AuthDTO> LoginAsync(LoginDTO loginDTO)
     {
         var authDTO = new AuthDTO();
@@ -217,7 +226,9 @@ public partial class AuthService(UserManager<AppUser> userManager, IJwtTokenServ
             {"email", user.Email}
         };
 
-        var callbackUrl = QueryHelpers.AddQueryString("https://localhost:7116/api/Auth/ConfirmEmail", param);
+        var request = _httpContextAccessor.HttpContext.Request;
+        var baseUrl = $"{request.Scheme}://{request.Host}";
+        var callbackUrl = QueryHelpers.AddQueryString($"{baseUrl}/api/Auth/ConfirmEmail", param);
         string emailBody = $@"
         <html>
             <body style=""font-family: Arial, sans-serif;"">
