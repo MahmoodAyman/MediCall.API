@@ -1,18 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Core.Interface;
-using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services
 {
     public class UploadFileService : IUploadFileService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public UploadFileService(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
         public async Task<string> UploadFile(IFormFile file)
         {
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
 
             if (!Directory.Exists(uploadsFolder))
             {
@@ -26,7 +31,10 @@ namespace Infrastructure.Services
             {
                 await file.CopyToAsync(stream);
             }
-            return filePath;
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+
+            return $"{baseUrl}/uploads/{uniqueFileName}";
         }
     }
 }
