@@ -97,7 +97,7 @@ namespace Infrastructure.Services
 
         private async Task<bool> Validation(PatientIllnessesDTO patientIllness)
         {
-            if(await _patientIllnessesRepository.IsIdValidTypeAsync<Patient>(patientIllness.PatientId)  && await _patientIllnessesRepository.IsIdValidTypeAsync<Illness>(patientIllness.IllnessId)
+            if(await _patientIllnessesRepository.IsIdValidTypeAsync<Patient>(patientIllness.PatientId)  && await _patientIllnessesRepository.IsIdValidTypeAsync<Illness>(patientIllness.IllnessId))
             {
                 return true;
             }
