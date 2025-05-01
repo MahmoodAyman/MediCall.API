@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,14 +35,14 @@ namespace Infrastructure.Migrations
                     DateOfBirth = table.Column<DateTime>(type: "date", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
                     ProfilePicture = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Location_Lat = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
-                    Location_Lng = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
+                    Location_Lat = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
+                    Location_Lng = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()"),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -443,9 +443,9 @@ namespace Infrastructure.Migrations
                     TransportationCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PatientLocation_Lat = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
                     PatientLocation_Lng = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
-                    NurseLocation_Lat = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
-                    NurseLocation_Lng = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
-                    NurseId = table.Column<string>(type: "char(14)", unicode: false, fixedLength: true, maxLength: 14, nullable: false),
+                    NurseLocation_Lat = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
+                    NurseLocation_Lng = table.Column<decimal>(type: "decimal(9,6)", nullable: true),
+                    NurseId = table.Column<string>(type: "char(14)", unicode: false, fixedLength: true, maxLength: 14, nullable: true),
                     PatientId = table.Column<string>(type: "char(14)", unicode: false, fixedLength: true, maxLength: 14, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
@@ -479,6 +479,9 @@ namespace Infrastructure.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     TransactionReference = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     VisitId = table.Column<int>(type: "int", nullable: false),
+                    NursePaid = table.Column<bool>(type: "bit", nullable: false),
+                    NursePaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NursePaymentReference = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()")

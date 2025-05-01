@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(MediCallContext))]
-    [Migration("20250425142602_SeedingData Migration")]
-    partial class SeedingDataMigration
+    [Migration("20250430220225_initDatabase")]
+    partial class initDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -598,7 +599,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("NurseId")
-                        .IsRequired()
                         .HasMaxLength(14)
                         .IsUnicode(false)
                         .HasColumnType("char(14)")
@@ -898,7 +898,8 @@ namespace Infrastructure.Migrations
                                 .HasForeignKey("AppUserId");
                         });
 
-                    b.Navigation("Location");
+                    b.Navigation("Location")
+                        .IsRequired();
 
                     b.Navigation("RefreshTokens");
                 });
@@ -1002,8 +1003,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Models.Nurse", "Nurse")
                         .WithMany("Visits")
                         .HasForeignKey("NurseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Core.Models.Patient", "Patient")
                         .WithMany("Visits")
@@ -1051,8 +1051,7 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Nurse");
 
-                    b.Navigation("NurseLocation")
-                        .IsRequired();
+                    b.Navigation("NurseLocation");
 
                     b.Navigation("Patient");
 
@@ -1171,8 +1170,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Payment")
                         .IsRequired();
 
-                    b.Navigation("Reviewing")
-                        .IsRequired();
+                    b.Navigation("Reviewing");
                 });
 
             modelBuilder.Entity("Core.Models.Nurse", b =>

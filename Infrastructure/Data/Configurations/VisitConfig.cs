@@ -25,7 +25,6 @@ namespace Infrastructure.Data.Configurations
                 .HasMaxLength(500);
 
             builder.Property(v => v.TransportationCost)
-                .IsRequired()
                 .HasColumnType("decimal(18,2)");
 
             builder.OwnsOne(v => v.PatientLocation, l =>
@@ -49,7 +48,6 @@ namespace Infrastructure.Data.Configurations
             });
 
             builder.Property(v => v.NurseId)
-                .IsRequired()
                 .HasMaxLength(14)
                 .IsFixedLength(true)
                 .IsUnicode(false);

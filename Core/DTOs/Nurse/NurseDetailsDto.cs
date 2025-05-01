@@ -31,5 +31,6 @@ namespace Core.DTOs.Nurse
         public string? ProfilePicture { get; set; }
 
         public int VisitCount { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }

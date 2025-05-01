@@ -1,4 +1,4 @@
-using API.SignalR;
+using Infrastructure.SignalR;
 using Core.DTOs.Payment;
 using Core.Interface;
 using Microsoft.AspNetCore.Http;
