@@ -17,25 +17,25 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllIllnesses()
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            if (userId == null)
+            var uid = User.FindFirst("uid")?.Value;
+            if (uid == null)
             {
                 return BadRequest("User ID not found.");
             }
-            var illnesses = await _patientIllnessesService.GetAllPatientIllnessesForUserAsync(userId);
+            var illnesses = await _patientIllnessesService.GetAllPatientIllnessesForUserAsync(uid);
             return Ok(illnesses);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetIllnessById(int id)
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            if (userId == null)
+            var uid = User.FindFirst("uid")?.Value;
+            if (uid == null)
             {
                 return BadRequest("User ID not found.");
             }
             try
             {
-                var illness = await _patientIllnessesService.GetPatientIllnessByIdAsync(id, userId);
+                var illness = await _patientIllnessesService.GetPatientIllnessByIdAsync(id, uid);
                 if (illness == null)
                 {
                     return NotFound();
@@ -50,12 +50,12 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddIllness([FromBody] PatientIllnessesDTO patientIllness)
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            if (userId == null)
+            var uid = User.FindFirst("uid")?.Value;
+            if (uid == null)
             {
                 return BadRequest("User ID not found.");
             }
-            patientIllness.PatientId = userId;
+            patientIllness.PatientId = uid;
             try
             {
                 var addedIllness = await _patientIllnessesService.AddPatientIllnessAsync(patientIllness);
@@ -70,12 +70,12 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateIllness([FromBody] PatientIllnessesDTO patientIllness)
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            if (userId == null)
+            var uid = User.FindFirst("uid")?.Value;
+            if (uid == null)
             {
                 return BadRequest("User ID not found.");
             }
-            patientIllness.PatientId = userId;
+            patientIllness.PatientId = uid;
             try
             {
                 var updatedIllness = await _patientIllnessesService.UpdatePatientIllnessAsync(patientIllness);
@@ -89,14 +89,14 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteIllness(int id)
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            if (userId == null)
+            var uid = User.FindFirst("uid")?.Value;
+            if (uid == null)
             {
                 return BadRequest("User ID not found.");
             }
             try
             {
-                await _patientIllnessesService.DeletePatientIllnessAsync(id, userId);
+                await _patientIllnessesService.DeletePatientIllnessAsync(id, uid);
                 return NoContent();
             }
             catch (Exception ex)

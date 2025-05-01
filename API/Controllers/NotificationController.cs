@@ -15,12 +15,12 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetNotifications()
         {
-            var userId = User.FindFirst("sub")?.Value;
-            if (userId == null)
+            var uid = User.FindFirst("sub")?.Value;
+            if (uid == null)
             {
                 return Unauthorized();
             }
-            var notifications = await _notificationService.GetNotificationsAsync(userId);
+            var notifications = await _notificationService.GetNotificationsAsync(uid);
             return Ok(notifications);
         }
 
@@ -28,12 +28,12 @@ namespace API.Controllers
         [Route("mark-as-read")]
         public async Task<IActionResult> MarkNotificationAsRead([FromBody] int notificationId)
         {
-            var userId = User.FindFirst("sub")?.Value;
-            if (userId == null)
+            var uid = User.FindFirst("sub")?.Value;
+            if (uid == null)
             {
                 return Unauthorized();
             }
-            var result = await _notificationService.MakeNotificationReadAsync(notificationId, userId);
+            var result = await _notificationService.MakeNotificationReadAsync(notificationId, uid);
             if (!result)
             {
                 return NotFound();
