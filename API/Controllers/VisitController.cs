@@ -39,8 +39,9 @@ namespace API.Controllers
 
         [Authorize(Roles = "Nurse")]
         [HttpPost("accept-visit-by-nurse")]
-        public async Task<IActionResult> AcceptVisit(int visitId, string nurseId)
+        public async Task<IActionResult> AcceptVisit(int visitId)
         {
+            var nurseId = User.FindFirst("uid")?.Value;
             if (string.IsNullOrWhiteSpace(nurseId))
             {
                 return BadRequest("No Nurse ID provided");
@@ -61,6 +62,7 @@ namespace API.Controllers
         [HttpPost("accept-nurse-by-patient")]
         public async Task<IActionResult> AcceptNurse(int visitId, string nurseId)
         {
+            var patientId = User.FindFirst("uid")?.Value;
             if (string.IsNullOrWhiteSpace(nurseId))
             {
                 return BadRequest("No Nurse ID provided");
@@ -69,7 +71,7 @@ namespace API.Controllers
             {
                 return BadRequest("No Visit ID provided");
             }
-            var result = await _visitService.AcceptNurseByPatient(visitId, nurseId);
+            var result = await _visitService.AcceptNurseByPatient(visitId, nurseId,patientId);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -79,8 +81,9 @@ namespace API.Controllers
 
         [Authorize(Roles = "Patient")]
         [HttpPost("cancel-visit-by-patient")]
-        public async Task<IActionResult> CancelVisitByPatient(int visitId, string patientId, string canclationReson)
+        public async Task<IActionResult> CancelVisitByPatient(int visitId, string canclationReson)
         {
+            var patientId = User.FindFirst("uid")?.Value;
             if (string.IsNullOrWhiteSpace(patientId))
             {
                 return BadRequest("No Patient ID provided");
@@ -99,8 +102,9 @@ namespace API.Controllers
 
         [Authorize(Roles = "Nurse")]
         [HttpPost("cancel-visit-by-nurse")]
-        public async Task<IActionResult> CancelVisitByNurse(int visitId, string nurseId, string canclationReson)
+        public async Task<IActionResult> CancelVisitByNurse(int visitId, string canclationReson)
         {
+            var nurseId = User.FindFirst("uid")?.Value;
             if (string.IsNullOrWhiteSpace(nurseId))
             {
                 return BadRequest("No Nurse ID provided");
@@ -119,8 +123,9 @@ namespace API.Controllers
 
         [Authorize(Roles = "Patient")]
         [HttpPost("complete-visit-by-patient")]
-        public async Task<IActionResult> CompleteVisitByPatient(int visitId, string patientId)
+        public async Task<IActionResult> CompleteVisitByPatient(int visitId)
         {
+            var patientId = User.FindFirst("uid")?.Value;
             if (string.IsNullOrWhiteSpace(patientId))
             {
                 return BadRequest("No Patient ID provided");

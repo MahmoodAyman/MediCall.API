@@ -235,7 +235,6 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
             return response;
         }
         await _notificationService.SendNotificationAsync(visit.PatientId, "There is a nurse near you.", "A nurse near you to perform the service",nurse);
-
         response.Success = true;
         response.Message = "Wait for the patient to answer.";
 
@@ -244,10 +243,11 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
 
 
 
-    public async Task<ResponseNearNursesDTO> AcceptNurseByPatient(int visitId, string nurseId)
+    public async Task<ResponseNearNursesDTO> AcceptNurseByPatient(int visitId, string nurseId,string patientId)
     {
         var response = new ResponseNearNursesDTO();
         var visit = await _visitRepository.GetByIdAsync(visitId);
+        
         var nurse = await _nurseRepository.GetByIdAsync(nurseId);
         var errors = validAcceptVisitByNurse(visit, nurse);
         if (errors != null && errors.Count > 0)
@@ -255,6 +255,13 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
             response.Success = false;
             response.Message = string.Join(" , ", errors);
             
+            return response;
+        }
+
+        if(visit.PatientId != patientId)
+        {
+            response.Success = false;
+            response.Message = "You are not allowed to accept this visit";
             return response;
         }
 
@@ -341,6 +348,13 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
 
             return response;
         }
+        if (visit.PatientId != patientId)
+        {
+            response.Success = false;
+            response.Message = "You are not allowed to cancel this visit";
+            return response;
+        }
+
         visit.Status = VisitStatus.Canceled;
         visit.CancellationReason = canclationReson;
         _visitRepository.Update(visit);
@@ -370,6 +384,14 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
 
             return response;
         }
+
+        if (visit.NurseId != nurseId)
+        {
+            response.Success = false;
+            response.Message = "You are not allowed to Cancel this visit";
+            return response;
+        }
+
         visit.Status = VisitStatus.Canceled;
         visit.CancellationReason = canclationReson;
         _visitRepository.Update(visit);
@@ -422,6 +444,14 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
 
             return response;
         }
+
+        if (visit.PatientId != patientId)
+        {
+            response.Success = false;
+            response.Message = "You are not allowed to complete this visit";
+            return response;
+        }
+
         visit.Status = VisitStatus.Done;
         visit.ActualVisitDate = DateTime.UtcNow;
         _visitRepository.Update(visit);
