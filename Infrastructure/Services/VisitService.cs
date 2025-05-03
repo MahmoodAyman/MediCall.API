@@ -1,4 +1,4 @@
-    using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Core.DTOs.Nurse;
@@ -215,7 +215,7 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
                 FirstName = visit.Patient.FirstName,
                 LastName = visit.Patient.LastName,
                 PhoneNumber = visit.Patient.PhoneNumber,
-                DateOfBirth = DateOnly.Parse(visit.Patient.DateOfBirth.ToString()),
+                DateOfBirth = DateOnly.FromDateTime(visit.Patient.DateOfBirth),
                 ProfilePicture = visit.Patient.ProfilePicture,
                 PatientIllnesses = visit.Patient.PatientIllnesses,
             }
@@ -265,7 +265,7 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
             return response;
         }
 
-        visit.Status = VisitStatus.Accepted;
+        visit.Status = VisitStatus.PendingPayment;
         visit.NurseId = nurseId;
         visit.NurseLocation = nurse.Location;
         visit.ActualVisitDate = DateTime.UtcNow;
@@ -274,16 +274,14 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
         _visitRepository.Update(visit);
         await _visitRepository.SaveAllAsync();
 
-
         nurse.IsAvailable = false;
         _nurseRepository.Update(nurse);
         await _nurseRepository.SaveAllAsync();
 
-
-        await _notificationService.SendNotificationAsync(nurseId, "Visit accepted", "You have accepted a visit", visit);
+        await _notificationService.SendNotificationAsync(nurseId, "Visit accepted", "The patient has accepted your request. Payment is now required.", visit);
 
         response.Success = true;
-        response.Message = "Visit accepted successfully";
+        response.Message = "Visit accepted successfully. Please proceed to payment.";
         response.Vist = ToVisitDto(visit);
         response.Nurses = new List<NurseDetailsDto>
         {

@@ -16,8 +16,8 @@ namespace Infrastructure.Services;
 
 public partial class AuthService(
     UserManager<AppUser> userManager,
-    IJwtTokenService jwtTokenService, 
-    IMailingService mailingService, 
+    IJwtTokenService jwtTokenService,
+    IMailingService mailingService,
     IUploadFileService uploadFile,
     IHttpContextAccessor httpContextAccessor,
     IGenericRepository<Certificate> certificateRepository
@@ -35,14 +35,14 @@ public partial class AuthService(
         var authDTO = new AuthDTO();
         var user = await _userManager.FindByEmailAsync(loginDTO.Email);
 
-        if (user is null ||! await _userManager.CheckPasswordAsync(user,loginDTO.Password))
+        if (user is null || !await _userManager.CheckPasswordAsync(user, loginDTO.Password))
         {
             authDTO.IsAuthenticated = false;
-            authDTO.Message="Email or password is incorrect";
+            authDTO.Message = "Email or password is incorrect";
             return authDTO;
         }
 
-        if(!await _userManager.IsEmailConfirmedAsync(user))
+        if (!await _userManager.IsEmailConfirmedAsync(user))
         {
             authDTO.IsAuthenticated = false;
             authDTO.Message = "The email is not confirmed. Check your inbox.";
@@ -117,17 +117,17 @@ public partial class AuthService(
         {
             return FailResult(string.Join(", ", validateErrors));
         }
-        string? imagePath =null;
+        string? imagePath = null;
         if (registerDTO.Image is not null)
         {
-           imagePath = await _uploadFileService.UploadFile(registerDTO.Image);
+            imagePath = await _uploadFileService.UploadFile(registerDTO.Image);
         }
 
         var user = new AppUser
         {
             Id = registerDTO.NationalId,
             Email = registerDTO.Email,
-            UserName = registerDTO.UserName,
+            UserName = registerDTO.Email.Split('@')[0],
             PhoneNumber = registerDTO.PhoneNumber,
             FirstName = registerDTO.FirstName,
             LastName = registerDTO.LastName,
@@ -135,16 +135,14 @@ public partial class AuthService(
             Gender = registerDTO.Gender,
             Location = registerDTO.Location,
             ProfilePicture = imagePath
-
         };
 
         var result = await _userManager.CreateAsync(user, registerDTO.Password);
         if (!result.Succeeded)
         {
-            FailResult(string.Join(", ", result.Errors.Select(e => e.Description)));
+            return FailResult(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        await _userManager.AddToRoleAsync(user, Role.Patient.ToString());
         await SendConfirmationEmail(user);
 
         var authDTO = new AuthDTO
@@ -157,7 +155,7 @@ public partial class AuthService(
     }
     public async Task<AuthDTO> NurseRegisterAsync(NurseRegisterDTO registerDTO)
     {
-        var validateErrors =await ValidateNurseRegisterDTOAsync(registerDTO);
+        var validateErrors = await ValidateNurseRegisterDTOAsync(registerDTO);
         if (validateErrors is not null && validateErrors.Count > 0)
         {
             return FailResult(string.Join(", ", validateErrors));
@@ -237,9 +235,9 @@ public partial class AuthService(
                 <a href=""{callbackUrl}"" style=""padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;"">Confirm Email</a>
                 <p>If you did not request this, please ignore this email.</p>
             </body>
-        </html>";   
+        </html>";
 
-        await _mailingService.SendEmailAsync(user.Email??throw new NullReferenceException("Eail is null here"), "Confirm your email", emailBody, null);
+        await _mailingService.SendEmailAsync(user.Email ?? throw new NullReferenceException("Eail is null here"), "Confirm your email", emailBody, null);
     }
     public async Task<AuthDTO> ConfirmEmailAsync(string email, string token)
     {
@@ -444,7 +442,7 @@ public partial class AuthService(
         {
             errors.Add($"Certificate file for {cert.Name} is not valid. Allowed formats: jpg, jpeg, png. Max size: 2MB.");
         }
-        if(cert.IsExpirable && dto.ExpirationDate == default)
+        if (cert.IsExpirable && dto.ExpirationDate == default)
         {
             errors.Add($"Expiration date is required for {cert.Name}.");
         }

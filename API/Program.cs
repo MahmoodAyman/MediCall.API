@@ -51,8 +51,9 @@ namespace API
             builder.Services.AddScoped<IServiceService, ServiceService>();
             builder.Services.AddScoped<IGetDataService, GetDataService>();
             builder.Services.AddScoped<IPatientIllnessesService, PatientIllnessesService>();
-            //builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<INotificationService,NotificationService>();
+            builder.Services.AddHttpClient();
 
 
 
