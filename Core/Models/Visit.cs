@@ -16,7 +16,24 @@ public class Visit : BaseEntity
     public decimal ServiceCost => Services.Sum(s => s.BasePrice);
     public decimal TransportationCost { get; set; }
 
-    public decimal CalculateTotalCost() => Services?.Sum(s => s.BasePrice) ?? 0 + TransportationCost;
+    public decimal CalculateTotalCost()
+    {
+        decimal totalCost = 0;
+        
+        // Sum the costs of all services
+        if (Services != null)
+        {
+            totalCost += Services.Sum(s => s.BasePrice);
+        }
+        
+        // Add transportation cost if set
+        if (TransportationCost > 0)
+        {
+            totalCost += TransportationCost;
+        }
+        
+        return totalCost;
+    }
 
     public required Location PatientLocation { get; set; }
     public Location? NurseLocation { get; set; }

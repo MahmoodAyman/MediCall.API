@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Core.DTOs.Payment;
 using Core.Enums;
 using Core.Interface;
 using Core.Models;
@@ -15,7 +16,7 @@ namespace Infrastructure.Services;
 
 public class PaymentService(IConfiguration _config, MediCallContext _context, HttpClient _httpClient) : IPaymentService
 {
-    public async Task<Payment> CreateOrUpdatePayment(int visitId)
+    public async Task<PaymentResponseDto> CreateOrUpdatePayment(int visitId)
     {
         // Get Visit
         var visit = await _context.Visits
@@ -34,52 +35,58 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
         var existingPayment = await _context.Payments.FirstOrDefaultAsync(p => p.VisitId == visitId);
         if (existingPayment != null)
         {
-            return existingPayment;
+            return new PaymentResponseDto
+            {
+                Id = existingPayment.Id,
+                TransactionReference = existingPayment.TransactionReference,
+                Status = existingPayment.Status,
+                Amount = existingPayment.Amount
+            };
         }
 
         // Create new Payment request
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://accept.paymob.com/v1/intention/");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://accept.paymob.com/api/acceptance/payment_keys");
 
-        var apiKey = _config["PaymentGateways:Paymob:SecretKey"];
+        var apiKey = _config["PaymentGateways:Paymob:ApiKey"];
+        var integrationId = _config["PaymentGateways:Paymob:PaymentIntegrationId"];
+        var iframeId = _config["PaymentGateways:Paymob:IframeId"];
 
-        request.Headers.Add("Authorization", $"Token {apiKey}");
+        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(integrationId) || string.IsNullOrEmpty(iframeId))
+        {
+            throw new InvalidOperationException("Paymob configuration is missing");
+        }
+
+        request.Headers.Add("Authorization", $"Bearer {apiKey}");
 
         decimal totalAmount = visit.CalculateTotalCost();
 
         // payment request payload: 
         var paymentRequest = new
         {
-            amount = (int)totalAmount,
-            currency = "EGP",
-            payment_methods = new object[] { 12, "card", _config["PaymentGateways:Paymob:PaymentIntegrationId"]!, },
-            items = new[] {
-                new {
-                    name = "Healthcare visit",
-                    amount = (int) totalAmount,
-                    description = $"Healthcare visit on {visit.ScheduledDate:yyyy-MM-dd}",
-                    quantity = 1
-                }
-            },
+            auth_token = apiKey,
+            amount_cents = (int)(totalAmount * 100),
+            expiration = 3600,
+            order_id = Guid.NewGuid().ToString(),
             billing_data = new
             {
-                appartment = "N/A",
+                apartment = "NA",
+                email = visit.Patient.Email,
+                floor = "NA",
                 first_name = visit.Patient.FirstName,
-                last_name = visit.Patient.LastName,
-                street = $"Coordinates : {visit.PatientLocation.Lat}, {visit.PatientLocation.Lng}",
-                building = "N/A",
+                street = "NA",
+                building = "NA",
                 phone_number = visit.Patient.PhoneNumber,
-                country = "EGY",
-                email = visit.Patient.Email,
-                floor = "N/A",
-                state = "Cairo",
-            },
-            customer = new
-            {
-                first_name = visit.Patient.FirstName,
+                shipping_method = "NA",
+                postal_code = "NA",
+                city = "Cairo",
+                country = "EG",
                 last_name = visit.Patient.LastName,
-                email = visit.Patient.Email,
+                state = "NA"
             },
-            extras = new
+            currency = "EGP",
+            integration_id = int.Parse(integrationId),
+            lock_order_when_paid = true,
+            extra = new
             {
                 visit_id = visit.Id
             }
@@ -87,20 +94,28 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
 
         var jsonContent = JsonSerializer.Serialize(paymentRequest);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        request.Content = content;
 
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
         var responseContent = await response.Content.ReadAsStringAsync();
-        var responseData = JsonSerializer.Deserialize<PaymobResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var responseData = JsonSerializer.Deserialize<PaymentKeyResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+        if (responseData == null || string.IsNullOrEmpty(responseData.Token))
+        {
+            throw new Exception("Failed to get payment token from payment gateway");
+        }
+
+        // Create payment iframe URL
+        var paymentUrl = $"https://accept.paymobsolutions.com/api/acceptance/iframes/{iframeId}?payment_token={responseData.Token}";
 
         var payment = new Payment
         {
             PaymentMethod = PaymentMethod.CreditCard,
             PaymentDate = DateTime.Now,
             Status = PaymentStatus.Pending,
-            TransactionReference = responseData?.Id.ToString() ?? Guid.NewGuid().ToString(),
+            TransactionReference = responseData.Order_id,
             VisitId = visit.Id,
             Visit = visit,
         };
@@ -108,10 +123,17 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
         _context.Payments.Add(payment);
         await _context.SaveChangesAsync();
 
-        visit.Status = VisitStatus.Confirmed;
+        visit.Status = VisitStatus.PendingPayment;
         await _context.SaveChangesAsync();
-        return payment;
 
+        return new PaymentResponseDto
+        {
+            Id = payment.Id,
+            TransactionReference = payment.TransactionReference,
+            Status = payment.Status,
+            Amount = payment.Amount,
+            PaymentUrl = paymentUrl
+        };
     }
 
     public async Task<Payment> UpdatePaymentStatus(string transactionReference, PaymentStatus status)
@@ -153,7 +175,7 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
         return true;
     }
 
-    public async Task<bool> processPaymentRefun(int visitId, string cancellationReason)
+    public async Task<bool> ProcessPaymentRefund(int visitId, string cancellationReason)
     {
         var visit = await _context.Visits.FirstOrDefaultAsync(v => v.Id == visitId) ?? throw new ArgumentException($"No visit with id {visitId} found");
 
@@ -161,31 +183,26 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
 
         if (payment.Status != PaymentStatus.Success || visit.Status == VisitStatus.Done)
         {
-            throw new Exception("This payment can not be refund");
+            throw new Exception("This payment can not be refunded");
         }
-
 
         // create paymob refund request 
         var request = new HttpRequestMessage(HttpMethod.Post, "https://accept.paymob.com/api/acceptance/void_refund/refund");
-        var apiKey = _config["PaymentGateways:Paymob:SecretKey"];
-        request.Headers.Add("Authorization", $"Token {apiKey}");
+        var apiKey = _config["PaymentGateways:Paymob:ApiKey"];
+        request.Headers.Add("Authorization", $"Bearer {apiKey}");
 
         var refundRequest = new
         {
+            auth_token = apiKey,
             transaction_id = payment.TransactionReference,
-            amount_cents = (int)payment.Amount * 100
+            amount_cents = (int)(payment.Amount * 100)
         };
         var jsonContent = JsonSerializer.Serialize(refundRequest);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        request.Content = content;
 
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
-
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var responseData = JsonSerializer.Deserialize<RefundResponse>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
 
         payment.Status = PaymentStatus.Refunded;
         visit.Status = VisitStatus.Canceled;
@@ -193,13 +210,58 @@ public class PaymentService(IConfiguration _config, MediCallContext _context, Ht
         await _context.SaveChangesAsync();
         return true;
     }
-    public class PaymobResponse
-    {
-        public Guid Id { get; set; }
-        public string RedirectURL { get; set; } = "";
-    }
-    public class RefundResponse
-    {
 
+    public async Task<PaymentStatus> HandlePaymentWebhook(PaymentWebhookDto webhookData)
+    {
+        if (webhookData.Obj == null || webhookData.Obj.Order == null || webhookData.Obj.Order.Extras == null)
+        {
+            throw new ArgumentException("Invalid webhook data received");
+        }
+
+        var visitId = webhookData.Obj.Order.Extras.VisitId;
+        var visit = await _context.Visits.FindAsync(visitId);
+        
+        if (visit == null)
+        {
+            throw new ArgumentException($"Visit with ID {visitId} not found");
+        }
+
+        var payment = await _context.Payments.FirstOrDefaultAsync(p => p.VisitId == visitId);
+        
+        if (payment == null)
+        {
+            throw new ArgumentException($"Payment for visit {visitId} not found");
+        }
+
+        var paymentStatus = PaymentStatus.Pending;
+
+        if (webhookData.Obj.Success)
+        {
+            paymentStatus = PaymentStatus.Success;
+            visit.Status = VisitStatus.Confirmed;
+        }
+        else if (webhookData.Obj.IsRefunded)
+        {
+            paymentStatus = PaymentStatus.Refunded;
+            visit.Status = VisitStatus.Canceled;
+            visit.CancellationReason = "Payment refunded";
+        }
+        else if (webhookData.Obj.IsVoided || !webhookData.Obj.Success)
+        {
+            paymentStatus = PaymentStatus.Failed;
+            visit.Status = VisitStatus.Canceled;
+            visit.CancellationReason = "Payment failed";
+        }
+
+        payment.Status = paymentStatus;
+        await _context.SaveChangesAsync();
+
+        return paymentStatus;
+    }
+
+    public class PaymentKeyResponse
+    {
+        public string Token { get; set; } = string.Empty;
+        public string Order_id { get; set; } = string.Empty;
     }
 }

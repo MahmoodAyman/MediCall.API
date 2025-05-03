@@ -1,4 +1,5 @@
 using Infrastructure.SignalR;
+using Core.DTOs.Payment;
 using Core.DTOs.Visit;
 using Core.Enums;
 using Core.Interface;
@@ -15,12 +16,14 @@ namespace API.Controllers
     public class VisitController : ControllerBase
     {
         private readonly IVisitService _visitService;
+        private readonly IPaymentService _paymentService;
 
-        public VisitController(IVisitService visitService)
+        public VisitController(IVisitService visitService, IPaymentService paymentService)
         {
             _visitService = visitService;
+            _paymentService = paymentService;
         }
-        [Authorize(Roles = "Patient")]
+        // [Authorize(Roles = "Patient")]
         [HttpPost("find-nurse")]
         public async Task<IActionResult> FindNearestNurses(RequestNearNursesDTO requestNeerNursesDTO)
         {
@@ -37,7 +40,7 @@ namespace API.Controllers
             return Ok(new {responseNeerNursesDTO.Nurses});
         }
 
-        [Authorize(Roles = "Nurse")]
+        // [Authorize(Roles = "Nurse")]
         [HttpPost("accept-visit-by-nurse")]
         public async Task<IActionResult> AcceptVisit(int visitId)
         {
@@ -58,7 +61,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Patient")]
+        // [Authorize(Roles = "Patient")]
         [HttpPost("accept-nurse-by-patient")]
         public async Task<IActionResult> AcceptNurse(int visitId, string nurseId)
         {
@@ -71,15 +74,39 @@ namespace API.Controllers
             {
                 return BadRequest("No Visit ID provided");
             }
-            var result = await _visitService.AcceptNurseByPatient(visitId, nurseId,patientId);
+            var result = await _visitService.AcceptNurseByPatient(visitId, nurseId, patientId);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
-            return Ok(result);
+
+            // Get payment information
+            try
+            {
+                var paymentResponse = await _paymentService.CreateOrUpdatePayment(visitId);
+                return Ok(new 
+                { 
+                    result.Success, 
+                    result.Message, 
+                    result.Vist, 
+                    result.Nurses,
+                    Payment = paymentResponse
+                });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new
+                {
+                    result.Success,
+                    result.Message,
+                    result.Vist,
+                    result.Nurses,
+                    PaymentError = ex.Message
+                });
+            }
         }
 
-        [Authorize(Roles = "Patient")]
+        // [Authorize(Roles = "Patient")]
         [HttpPost("cancel-visit-by-patient")]
         public async Task<IActionResult> CancelVisitByPatient(int visitId, string canclationReson)
         {
@@ -100,7 +127,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Nurse")]
+        // [Authorize(Roles = "Nurse")]
         [HttpPost("cancel-visit-by-nurse")]
         public async Task<IActionResult> CancelVisitByNurse(int visitId, string canclationReson)
         {
@@ -121,7 +148,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Patient")]
+        // [Authorize(Roles = "Patient")]
         [HttpPost("complete-visit-by-patient")]
         public async Task<IActionResult> CompleteVisitByPatient(int visitId)
         {
