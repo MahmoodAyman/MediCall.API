@@ -2,6 +2,7 @@ using Core.Interface;
 using Core.Models;
 using Infrastructure.Configurations;
 using Infrastructure.Data;
+using Infrastructure.Data.SeedDatas;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +14,7 @@ namespace AdminDashboard
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,21 @@ namespace AdminDashboard
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             var app = builder.Build();
+
+
+            //if you run the app for the first time, you need to create admin
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    await AppDbSeeder.SeedAsync(services); 
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Seeding failed: {ex.Message}");
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
