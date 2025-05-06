@@ -15,5 +15,6 @@ namespace Core.Interface
         Task<AuthDTO> LoginAsync(LoginDTO loginDTO);
         Task<AuthDTO> RefreshTokenAsync(string token);
         Task<AuthDTO> ConfirmEmailAsync(string email, string token);
+        Task<AppUser> GetUserByEmailAsync(string email);
     }
 }
