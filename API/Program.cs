@@ -30,8 +30,8 @@ namespace API
 
 
             builder.Services.AddControllers().AddJsonOptions(options =>
-
-                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            { 
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.WriteIndented = true;
             });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
