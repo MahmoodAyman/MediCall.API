@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Core.Interface;
 using Core.Models;
@@ -29,7 +30,7 @@ namespace API
 
 
             builder.Services.AddControllers().AddJsonOptions(options =>
-            {
+
                 options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.WriteIndented = true;
             });

@@ -477,4 +477,15 @@ public partial class AuthService(
     private static partial Regex PhoneRegex();
     [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex EmailRegex();
+    public async Task<AppUser> GetUserByEmailAsync(string email)
+    {
+        if (string.IsNullOrEmpty(email))
+        {
+            return null;
+        }
+
+        var user = await _userManager.FindByEmailAsync(email);
+        return user;
+    }
+
 }

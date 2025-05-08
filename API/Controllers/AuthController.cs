@@ -116,5 +116,41 @@ namespace API.Controllers
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
+        [HttpGet("user/profile")]
+        public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest(new { Message = "Email is required" });
+            }
+
+            var user = await _authService.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                return NotFound(new { Message = "User not found" });
+            }
+
+            // Create a response object with only the necessary user information
+            // to avoid exposing sensitive data
+            var userResponse = new
+            {
+                Id = user.Id,
+                //nid = user.na
+                UserName = user.UserName,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                DateOfBirth = user.DateOfBirth,
+                Gender = user.Gender,
+                Location = user.Location,
+                ProfilePicture = user.ProfilePicture,
+                //Role = await _authService.GetUserRoleAsync(user)
+            };
+
+            return Ok(userResponse);
+        }
+
     }
 }
