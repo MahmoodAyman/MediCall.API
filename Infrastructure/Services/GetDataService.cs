@@ -47,7 +47,8 @@ namespace Infrastructure.Services
             {
                 Id = s.Id,
                 Name = s.Name,
-                Description = s.Description
+                Description = s.Description,
+                BasePrice = s.BasePrice
             }).ToList();
         }
     }
