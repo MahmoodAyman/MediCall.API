@@ -9,15 +9,19 @@ public class VerifieNurseCertificateController : Controller
     private readonly IGenericRepository<NurseCertificate> _nurseCertificateRepository;
     private readonly IGenericRepository<Nurse> _nurseRepository;
     private readonly IGenericRepository<Certificate> _certificateRepository;
+    private readonly IMailingService _mailingService;
 
     public VerifieNurseCertificateController(
         IGenericRepository<NurseCertificate> nurseCertificateRepository,
         IGenericRepository<Nurse> nurseRepository,
-        IGenericRepository<Certificate> certificateRepository)
+        IGenericRepository<Certificate> certificateRepository,
+        IMailingService mailingService
+        )
     {
         _nurseCertificateRepository = nurseCertificateRepository;
         _nurseRepository = nurseRepository;
         _certificateRepository = certificateRepository;
+        _mailingService = mailingService;
     }
 
     public async Task<IActionResult> Index()
@@ -55,9 +59,8 @@ public class VerifieNurseCertificateController : Controller
         var verifiedRequiredCertificatesCount = nurse.Certificates.Count(c => c.IsVerified && c.Certificate.IsRequired);
 
         nurse.IsVerified = verifiedRequiredCertificatesCount == requiredCertificatesCount;
-        
-
         _nurseRepository.Update(nurse);
+        await _mailingService.SendEmailAsync(nurse.Email, "Nurse Verification", "Your nurse account has been verified successfully.",null);
         await _nurseRepository.SaveAllAsync();
     }
 }
