@@ -138,6 +138,9 @@ public partial class AuthService(
         };
 
         var result = await _userManager.CreateAsync(user, registerDTO.Password);
+
+        await _userManager.AddToRoleAsync(user, Role.Patient.ToString());
+
         if (!result.Succeeded)
         {
             return FailResult(string.Join(", ", result.Errors.Select(e => e.Description)));
