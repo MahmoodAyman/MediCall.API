@@ -123,7 +123,7 @@ public partial class AuthService(
             imagePath = await _uploadFileService.UploadFile(registerDTO.Image);
         }
 
-        var user = new AppUser
+        var user = new Patient
         {
             Id = registerDTO.NationalId,
             Email = registerDTO.Email,
@@ -138,6 +138,7 @@ public partial class AuthService(
         };
 
         var result = await _userManager.CreateAsync(user, registerDTO.Password);
+
 
         await _userManager.AddToRoleAsync(user, Role.Patient.ToString());
 

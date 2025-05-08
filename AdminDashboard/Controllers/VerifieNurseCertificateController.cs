@@ -55,7 +55,7 @@ public class VerifieNurseCertificateController : Controller
         var verifiedRequiredCertificatesCount = nurse.Certificates.Count(c => c.IsVerified && c.Certificate.IsRequired);
 
         nurse.IsVerified = verifiedRequiredCertificatesCount == requiredCertificatesCount;
-        // Note: I must notfy the nurse about the verification status if changed
+        
 
         _nurseRepository.Update(nurse);
         await _nurseRepository.SaveAllAsync();
