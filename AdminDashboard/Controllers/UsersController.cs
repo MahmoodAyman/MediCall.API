@@ -44,6 +44,12 @@ namespace AdminDashboard.Controllers
             var user = _userManager.FindByIdAsync(id).Result;
             if (user != null)
             {
+                // Check if the user is not the login onr
+                if (user.UserName == User.Identity.Name)
+                {
+                    ModelState.AddModelError("", "You cannot remove admin role from yourself");
+                    return View();
+                }
                 var result = _userManager.RemoveFromRoleAsync(user, "Admin").Result;
                 if (result.Succeeded)
                 {
