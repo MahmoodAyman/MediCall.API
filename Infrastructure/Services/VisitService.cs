@@ -81,7 +81,7 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
 
         var visit = await _visitRepository.GetByIdAsync(visitId)??throw new Exception("visit is null");
         responseNeerNurses.Nurses = matchedNurses;
-        responseNeerNurses.Vist = ToVisitDto(visit);
+        responseNeerNurses.Visit = ToVisitDto(visit);
         responseNeerNurses.Success = true;
 
         foreach( var nurse in matchedNurses)
@@ -282,7 +282,7 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
 
         response.Success = true;
         response.Message = "Visit accepted successfully. Please proceed to payment.";
-        response.Vist = ToVisitDto(visit);
+        response.Visit = ToVisitDto(visit);
         response.Nurses = new List<NurseDetailsDto>
         {
             new NurseDetailsDto
@@ -467,7 +467,7 @@ public class VisitService(IGenericRepository<Visit> visitRepository,
 
         response.Success = true;
         response.Message = "Visit completed successfully";
-        response.Vist = ToVisitDto(visit);
+        response.Visit = ToVisitDto(visit);
         response.Nurses = new List<NurseDetailsDto>
         {
             new NurseDetailsDto

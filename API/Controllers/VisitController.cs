@@ -94,7 +94,7 @@ namespace API.Controllers
                 { 
                     result.Success, 
                     result.Message, 
-                    result.Vist, 
+                    result.Visit, 
                     result.Nurses,
                     Payment = paymentResponse
                 });
@@ -105,7 +105,7 @@ namespace API.Controllers
                 {
                     result.Success,
                     result.Message,
-                    result.Vist,
+                    result.Visit,
                     result.Nurses,
                     PaymentError = ex.Message
                 });

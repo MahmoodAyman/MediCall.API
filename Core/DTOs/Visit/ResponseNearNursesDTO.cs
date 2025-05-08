@@ -12,7 +12,7 @@ namespace Core.DTOs.Visit
     {
         public string? Message { get; set; }
         public bool Success { get; set; }
-        public VisitDTO? Vist { get; set; }
+        public VisitDTO? Visit { get; set; }
         public List<NurseDetailsDto> Nurses { get; set; } = [];
 
 
