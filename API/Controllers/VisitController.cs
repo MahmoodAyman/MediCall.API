@@ -43,7 +43,7 @@ namespace API.Controllers
                 return BadRequest(responseNeerNursesDTO.Message);
             }
 
-            return Ok(new {responseNeerNursesDTO.Nurses});
+            return Ok(responseNeerNursesDTO);
         }
 
         [Authorize(Roles = "Nurse")]
