@@ -65,6 +65,7 @@ Web application for administrative functions:
 - **Real-time Communication**: SignalR
 - **Payment Processing**: Integration with third-party payment gateway (Paymob)
 - **Location Services**: Geospatial calculations for proximity matching
+- **Frontend**: Angular (developed by Abdelrahman Fathy)
 
 ## Contributors
 
@@ -74,18 +75,26 @@ Web application for administrative functions:
 - Payment processing integration
 - SignalR real-time notifications
 - Service management
+- **Core Feature**: Implemented the nearest available and verified nurse discovery system using the Haversine Equation for geolocation matching
 
 ### Abdulaziz Taha
-- Database configurations
 - Authentication and authorization
 - Admin dashboard development
 - Data seeding and management
 - User management
+- Advanced validation system for National ID, birth data, and gender verification
+- Email confirmation system using MailSender service
 
 ### Ahmed Ashraf
 - Data Transfer Objects (DTOs)
 - Review system implementation
 - API documentation
+
+### Abdelrahman Fathy
+- Angular frontend development
+- User interface design and implementation
+- Frontend-backend integration
+- access it from [GitHub Repo](https://github.com/abdofathy883/MediCall)
 
 ## Development Setup
 
