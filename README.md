@@ -76,6 +76,7 @@ Web application for administrative functions:
 - Service management
 
 ### Abdulaziz Taha
+- Database configurations
 - Authentication and authorization
 - Admin dashboard development
 - Data seeding and management
